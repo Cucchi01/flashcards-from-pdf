@@ -8,9 +8,11 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QDateEdit,
     QPushButton,
+    QVBoxLayout,
 )
 from PyQt6.QtCore import Qt
 from application_costants import *
+from decksStructure import DecksStructure
 
 
 class MainWindow(QWidget):
@@ -45,13 +47,12 @@ class MainWindow(QWidget):
 
     def __get_tab_decks(self) -> QWidget:
         # personal page
-        personal_page = QWidget(self)
-        layout = QFormLayout()
-        personal_page.setLayout(layout)
-        layout.addRow("First Name:", QLineEdit(self))
-        layout.addRow("Last Name:", QLineEdit(self))
-        layout.addRow("DOB:", QDateEdit(self))
-        return personal_page
+        decks_page = QWidget(self)
+        layout = QVBoxLayout()
+        tree = DecksStructure(decks_page)
+        tree.show()
+        layout.addWidget(tree)
+        return decks_page
 
     def __get_tab_stats(self) -> QWidget:
         # personal page
@@ -62,7 +63,6 @@ class MainWindow(QWidget):
         layout.addRow("Last Name:", QLineEdit(self))
         layout.addRow("DOB:", QDateEdit(self))
         return personal_page
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
