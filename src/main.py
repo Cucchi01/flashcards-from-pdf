@@ -10,10 +10,12 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from PyQt6.QtCore import Qt
+
 from application_costants import *
-from decksStructure import DecksStructure
+from decks_structure import DecksStructure
 
 import sys
+
 
 class MainWindow(QWidget):
     def __init__(self, *args, **kwargs):
@@ -63,6 +65,7 @@ class MainWindow(QWidget):
         layout.addRow("Last Name:", QLineEdit(self))
         layout.addRow("DOB:", QDateEdit(self))
         return personal_page
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
