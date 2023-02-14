@@ -3,6 +3,13 @@ data = {"Project A": ["file_a.py", "file_a.txt", "something.xls"],
         "Project B": ["file_b.csv", "photo.jpg"],
         "Project C": []}
 
+def get_decks_structure_from_disk(root_folder: str)->dict:
+    decks = {}
+    
+
+
+    return 
+
 class DecksStructure(QTreeWidget):
     def __init__(self, parent) -> QTreeWidget:
         super().__init__(parent)

@@ -1,4 +1,3 @@
-import sys
 from PyQt6.QtWidgets import (
     QApplication,
     QWidget,
@@ -14,6 +13,7 @@ from PyQt6.QtCore import Qt
 from application_costants import *
 from decksStructure import DecksStructure
 
+import sys
 
 class MainWindow(QWidget):
     def __init__(self, *args, **kwargs):
