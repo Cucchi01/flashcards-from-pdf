@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QDateEdit,
     QPushButton,
     QVBoxLayout,
+    QLabel,
 )
 from PyQt6.QtCore import Qt
 
@@ -48,23 +49,23 @@ class MainWindow(QWidget):
         return tab
 
     def __get_tab_decks(self) -> QWidget:
-        # personal page
+        # decks page
         decks_page = QWidget(self)
         layout = QVBoxLayout()
-        tree = DecksStructure(decks_page)
+        tree = DecksStructure(decks_page, PATH_TO_DECKS_ABS)
         tree.show()
         layout.addWidget(tree)
         return decks_page
 
     def __get_tab_stats(self) -> QWidget:
-        # personal page
-        personal_page = QWidget(self)
-        layout = QFormLayout()
-        personal_page.setLayout(layout)
-        layout.addRow("First Name:", QLineEdit(self))
-        layout.addRow("Last Name:", QLineEdit(self))
-        layout.addRow("DOB:", QDateEdit(self))
-        return personal_page
+        # statistics page
+        stats_page = QWidget(self)
+        layout = QVBoxLayout()
+        label = QLabel(self)
+        label.setText("Work in progress...")
+        layout.addWidget(label)
+        stats_page.setLayout(layout)
+        return stats_page
 
 
 if __name__ == "__main__":
