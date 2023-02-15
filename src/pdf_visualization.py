@@ -8,9 +8,11 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QPixmap
+from pdf2image import convert_from_path
 
 import sys
 import os
+import tempfile
 
 from application_costants import *
 
@@ -21,6 +23,7 @@ class PDFWindowVisualization(QWidget):
 
         self.path_of_pdf = path_of_pdf
         self.filename = os.path.basename(path_of_pdf)
+        self.pdf_pages = convert_from_path(self.path_of_pdf, dpi=500)
 
         self.__set_window_style()
         self.__set_window_layout()
@@ -58,21 +61,29 @@ class PDFWindowVisualization(QWidget):
         main = QWidget(self)
         layout = QVBoxLayout()
 
-        file_path = "".join([os.path.dirname(__file__), "\\night.jpg"])
+        # TODO: change the input of the file and the output
+        file_path = "".join([os.path.dirname(__file__), "\\out.png"])
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            # TODO: visualize and handle the PDF
+            first_page = self.pdf_pages[0]
+            first_page.save(file_path, "png")
+            print("created temporary directory", tmpdirname)
+
         pixmap = QPixmap(file_path)
+
+        # TODO: improve the quality of this action
         pixmap = pixmap.scaled(
-            BASE_HOME_WIDTH // 2,
-            BASE_HOME_HEIGHT // 2,
+            BASE_HOME_WIDTH,
+            BASE_HOME_HEIGHT,
             aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatioByExpanding,
         )
         label = QLabel(main)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setPixmap(pixmap)
 
-        label.setMaximumSize(BASE_HOME_WIDTH, BASE_HOME_HEIGHT)
-
         layout.addWidget(label)
         main.setLayout(layout)
+
         return main
 
     def __get_bottom_widget(self) -> QWidget:
@@ -94,5 +105,6 @@ class PDFWindowVisualization(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     # TODO: put the right path
-    window = PDFWindowVisualization("/path/to/file.pdf")
+    path_to_pdf = "".join([os.path.dirname(__file__), "\\file1.pdf"])
+    window = PDFWindowVisualization(path_to_pdf)
     sys.exit(app.exec())
