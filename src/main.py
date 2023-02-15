@@ -29,7 +29,7 @@ class MainWindow(QWidget):
 
     def __set_window_style(self):
         self.setWindowTitle(APPLICATION_NAME)
-        self.resize(BASE_WIDTH, BASE_HEIGHT)
+        self.resize(BASE_HOME_WIDTH, BASE_HOME_HEIGHT)
 
     def __set_window_layout(self):
         main_layout = QGridLayout(self)

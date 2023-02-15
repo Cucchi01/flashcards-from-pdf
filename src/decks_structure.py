@@ -30,7 +30,7 @@ class DirectoryEntry:
 
 
 class DirectoryEntryFile(DirectoryEntry):
-    def __init__(self, entry_name: str, questions_available: bool = None):
+    def __init__(self, entry_name: str, questions_available: bool = False):
         super().__init__(type=FILE, entry_name=entry_name)
         self.questions_available = questions_available
 
@@ -60,9 +60,9 @@ def get_decks_structure_from_disk(root_folder_path: str) -> DirectoryEntryFolder
 
 
 def get_entries_from_path(path: str) -> dict:
-    decks = dict({})
+    decks: dict[str, DirectoryEntryFile | DirectoryEntryFolder] = dict({})
     with os.scandir(path) as entries:
-        files_processed = set({})
+        files_processed: set[str] = set({})
         for entry in entries:
             if not entry.name.startswith(".") and entry.is_file():
                 process_entry_file(decks, files_processed, entry.name)
@@ -100,7 +100,7 @@ def process_entry_folder(decks, path, entry_name):
 
 
 class DecksStructure(QTreeWidget):
-    def __init__(self, parent, path) -> QTreeWidget:
+    def __init__(self, parent, path) -> None:
         super().__init__(parent)
         self.num_col = 4
         self.root_folder = DirectoryEntryFolder(entry_name="root", path=path)
@@ -126,7 +126,7 @@ class DecksStructure(QTreeWidget):
         self.setColumnCount(self.num_col)
         self.setFont(QFont("Calisto MT", 12))
         self.setHeaderLabels(["Name", "Type", "Buttons", "Path"])
-        base_width = application_costants.BASE_WIDTH // (self.num_col)
+        base_width = application_costants.BASE_HOME_WIDTH // (self.num_col)
         self.header().setDefaultSectionSize(base_width)
 
     def __create_top_level_tree(self):
