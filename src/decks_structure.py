@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QColor, QFont
 
 import os
+import tempfile
 
 import application_costants
 
@@ -48,6 +49,9 @@ class DirectoryEntryFolder(DirectoryEntry):
 
     def get_entries(self):
         return self._entries
+
+    def get_path(self):
+        return self._path
 
 
 def get_decks_structure_from_disk(root_folder_path: str) -> DirectoryEntryFolder:
@@ -98,19 +102,31 @@ def process_entry_folder(decks, path, entry_name):
 class DecksStructure(QTreeWidget):
     def __init__(self, parent, path) -> QTreeWidget:
         super().__init__(parent)
+        self.num_col = 4
         self.root_folder = DirectoryEntryFolder(entry_name="root", path=path)
         self.__create_tree()
+
+        # app = self.headerItem()
+        # col = app.takeChild(self.num_col - self.num_hidden_col)
+        # col.setHidden(True)
+        self.itemDoubleClicked.connect(self.__onItemClicked)
+
+    def __onItemClicked(self, it, col):
+        path_col = 3
+        print(it, col, it.text(path_col))
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            # TODO: visualize and handle the PDF
+            print("created temporary directory", tmpdirname)
 
     def __create_tree(self) -> None:
         self.__set_style_tree()
         self.__create_top_level_tree()
 
     def __set_style_tree(self):
-        col_num = 3
-        self.setColumnCount(col_num)
+        self.setColumnCount(self.num_col)
         self.setFont(QFont("Calisto MT", 12))
-        self.setHeaderLabels(["Name", "Type", "Buttons"])
-        base_width = application_costants.BASE_WIDTH // (col_num)
+        self.setHeaderLabels(["Name", "Type", "Buttons", "Path"])
+        base_width = application_costants.BASE_WIDTH // (self.num_col)
         self.header().setDefaultSectionSize(base_width)
 
     def __create_top_level_tree(self):
@@ -123,14 +139,13 @@ class DecksStructure(QTreeWidget):
         for _, value in decks:
             type = value.get_type()
             entry_name = value.get_entry_name()
-
+            entry_pathname = folder.get_path()
             if type == FILE:
-                child = self.__create_entry_file(entry_name)
+                child = self.__create_entry_file(entry_name, entry_pathname)
             elif type == FOLDER:
                 child_entries = self.__get_subtree(value)
-                child = QTreeWidgetItem([entry_name, "Dir", ""])
+                child = QTreeWidgetItem([entry_name, "Dir", "", entry_pathname])
                 child.setBackground(0, QColor(218, 224, 126))
-                # self.__set_style_folder_entry(child)
                 child.addChildren(child_entries)
             else:
                 print("Element not considered")
@@ -139,18 +154,12 @@ class DecksStructure(QTreeWidget):
 
         return entries
 
-    def __create_entry_file(self, entry_name):
+    def __create_entry_file(self, entry_name, path):
         ext = entry_name.split(".")[-1].upper()
-        child = QTreeWidgetItem([entry_name, ext, ""])
+        child = QTreeWidgetItem([entry_name, ext, "", path])
 
         pixmapi = getattr(QStyle.StandardPixmap, "SP_MediaPlay")
         icon = self.style().standardIcon(pixmapi)
         child.setIcon(2, icon)
 
         return child
-
-    def __set_style_folder_entry(self, folder_entry):
-        p = folder_entry.palette()
-
-        p.setColor(folder_entry.backgroundRole(), QColor(218, 224, 126))
-        folder_entry.setPalette(p)
