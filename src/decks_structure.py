@@ -6,69 +6,14 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QStyle,
 )
+from PyQt6.QtGui import QColor, QFont
 
 import os
 
-data = {
-    "Project A": ["file_a.py", "file_a.txt", "something.xls"],
-    "Project B": ["file_b.csv", "photo.jpg"],
-    "Project C": [],
-}
+import application_costants
 
 FOLDER = 0
 FILE = 1
-
-
-class DecksStructure(QTreeWidget):
-    def __init__(self, parent, path) -> QTreeWidget:
-        super().__init__(parent)
-        self.root_folder = DirectoryEntryFolder(entry_name="root", path=path)
-        self.__create_tree()
-
-    def __create_tree(self) -> None:
-        self.setColumnCount(2)
-        self.setHeaderLabels(["Name", "Type", "Buttons"])
-        items = []
-        for key, values in data.items():
-            item = QTreeWidgetItem([key])
-            for value in values:
-                ext = value.split(".")[-1].upper()
-                child = QTreeWidgetItem([value, ext, ""])
-                pixmapi = getattr(QStyle.StandardPixmap, "SP_MediaPlay")
-                icon = self.style().standardIcon(pixmapi)
-                child.setIcon(2, icon)
-                item.addChild(child)
-
-            items.append(item)
-
-        self.insertTopLevelItems(0, items)
-
-    def __create_tree(self) -> None:
-        self.setColumnCount(3)
-        self.setHeaderLabels(["Name", "Type", "Buttons"])
-        items = []
-
-        item = QTreeWidgetItem(["root"])
-        decks = self.root_folder.get_entries().items()
-        for key, value in decks:
-            type = value.get_type()
-            entry_name = value.get_entry_name()
-            if type == FILE:
-                ext = entry_name.split(".")[-1].upper()
-                child = QTreeWidgetItem([entry_name, ext, ""])
-                pixmapi = getattr(QStyle.StandardPixmap, "SP_MediaPlay")
-                icon = self.style().standardIcon(pixmapi)
-                child.setIcon(2, icon)
-                item.addChild(child)
-            elif type == FOLDER:
-                pass
-            else:
-                print("Element not considered")
-
-            item.addChild(child)
-
-        items.append(item)
-        self.insertTopLevelItems(0, items)
 
 
 class DirectoryEntry:
@@ -148,3 +93,64 @@ def process_entry_file(decks, files_processed, entry_name):
 def process_entry_folder(decks, path, entry_name):
     child_folder = os.path.join(path, entry_name)
     decks[entry_name] = DirectoryEntryFolder(entry_name=entry_name, path=child_folder)
+
+
+class DecksStructure(QTreeWidget):
+    def __init__(self, parent, path) -> QTreeWidget:
+        super().__init__(parent)
+        self.root_folder = DirectoryEntryFolder(entry_name="root", path=path)
+        self.__create_tree()
+
+    def __create_tree(self) -> None:
+        self.__set_style_tree()
+        self.__create_top_level_tree()
+
+    def __set_style_tree(self):
+        col_num = 3
+        self.setColumnCount(col_num)
+        self.setFont(QFont("Calisto MT", 12))
+        self.setHeaderLabels(["Name", "Type", "Buttons"])
+        base_width = application_costants.BASE_WIDTH // (col_num)
+        self.header().setDefaultSectionSize(base_width)
+
+    def __create_top_level_tree(self):
+        entries = self.__get_subtree(self.root_folder)
+        self.insertTopLevelItems(0, entries)
+
+    def __get_subtree(self, folder: DirectoryEntryFolder):
+        entries = []
+        decks = folder.get_entries().items()
+        for _, value in decks:
+            type = value.get_type()
+            entry_name = value.get_entry_name()
+
+            if type == FILE:
+                child = self.__create_entry_file(entry_name)
+            elif type == FOLDER:
+                child_entries = self.__get_subtree(value)
+                child = QTreeWidgetItem([entry_name, "Dir", ""])
+                child.setBackground(0, QColor(218, 224, 126))
+                # self.__set_style_folder_entry(child)
+                child.addChildren(child_entries)
+            else:
+                print("Element not considered")
+
+            entries.append(child)
+
+        return entries
+
+    def __create_entry_file(self, entry_name):
+        ext = entry_name.split(".")[-1].upper()
+        child = QTreeWidgetItem([entry_name, ext, ""])
+
+        pixmapi = getattr(QStyle.StandardPixmap, "SP_MediaPlay")
+        icon = self.style().standardIcon(pixmapi)
+        child.setIcon(2, icon)
+
+        return child
+
+    def __set_style_folder_entry(self, folder_entry):
+        p = folder_entry.palette()
+
+        p.setColor(folder_entry.backgroundRole(), QColor(218, 224, 126))
+        folder_entry.setPalette(p)

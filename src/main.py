@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
     QLabel,
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 
 from application_costants import *
 from decks_structure import DecksStructure
@@ -28,7 +29,7 @@ class MainWindow(QWidget):
 
     def __set_window_style(self):
         self.setWindowTitle(APPLICATION_NAME)
-        self.resize(800, 600)
+        self.resize(BASE_WIDTH, BASE_HEIGHT)
 
     def __set_window_layout(self):
         main_layout = QGridLayout(self)
@@ -39,6 +40,7 @@ class MainWindow(QWidget):
     def __get_tab_widget(self) -> QTabWidget:
         # create a tab widget
         tab = QTabWidget(self)
+        tab.setFont(QFont("Calisto MT", 14))
 
         deck_tab = self.__get_tab_decks()
         stats_tab = self.__get_tab_stats()
@@ -55,6 +57,7 @@ class MainWindow(QWidget):
         tree = DecksStructure(decks_page, PATH_TO_DECKS_ABS)
         tree.show()
         layout.addWidget(tree)
+        decks_page.setLayout(layout)
         return decks_page
 
     def __get_tab_stats(self) -> QWidget:
