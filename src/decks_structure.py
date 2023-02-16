@@ -12,6 +12,7 @@ import os
 import tempfile
 
 import application_costants
+import pdf_visualization
 
 FOLDER = 0
 FILE = 1
@@ -103,7 +104,9 @@ class DecksStructure(QTreeWidget):
     def __init__(self, parent, path) -> None:
         super().__init__(parent)
         self.num_col = 4
+        self.path_col = self.num_col - 1  # path column is the last
         self.root_folder = DirectoryEntryFolder(entry_name="root", path=path)
+        self.pdf_window = None
         self.__create_tree()
 
         # app = self.headerItem()
@@ -111,12 +114,13 @@ class DecksStructure(QTreeWidget):
         # col.setHidden(True)
         self.itemDoubleClicked.connect(self.__onItemClicked)
 
-    def __onItemClicked(self, it, col):
-        path_col = 3
-        print(it, col, it.text(path_col))
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            # TODO: visualize and handle the PDF
-            print("created temporary directory", tmpdirname)
+    def __onItemClicked(self, entry_pressed, col_pressed):
+        name_col = 0
+        full_name = entry_pressed.text(name_col)
+        path_name = entry_pressed.text(self.path_col)
+        full_path = os.path.join(path_name, full_name)
+        self.pdf_window = pdf_visualization.PDFWindowVisualization(full_path)
+        self.pdf_window.show()
 
     def __create_tree(self) -> None:
         self.__set_style_tree()
