@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QPixmap
+from PyQt6.QtGui import QFont, QPixmap, QResizeEvent
 from pdf2image import convert_from_path
 from PIL import Image as PILImage
 
@@ -16,6 +16,7 @@ import os
 import tempfile
 
 from application_costants import *
+from image_visualization import ZoomableImage
 
 
 class PDFWindowVisualization(QWidget):
@@ -27,6 +28,8 @@ class PDFWindowVisualization(QWidget):
 
         self.path_of_pdf: str = path_of_pdf
         self.filename: str = os.path.basename(path_of_pdf)
+        # TODO: move the retrieval of the images on a different thread. So I can preload all
+        #  the images of the current pdf and then move smoothly between them
         self.pdf_pages: list[PILImage.Image] = convert_from_path(
             self.path_of_pdf, dpi=500
         )
@@ -38,6 +41,8 @@ class PDFWindowVisualization(QWidget):
         self.next_button: QPushButton
         self.is_back_button_disabled: bool = True
         self.is_next_button_disabled: bool = False
+        self.main_layout: QVBoxLayout
+        self.zoomable_image: ZoomableImage
 
         self.__set_window_style()
         self.__set_window_layout()
@@ -46,19 +51,18 @@ class PDFWindowVisualization(QWidget):
 
     def __set_window_style(self) -> None:
         self.setWindowTitle(APPLICATION_NAME)
-        self.resize(BASE_HOME_WIDTH, BASE_HOME_HEIGHT)
 
     def __set_window_layout(self) -> None:
-        main_layout = QVBoxLayout(self)
-        self.setLayout(main_layout)
+        main_window_layout = QVBoxLayout(self)
+        self.setLayout(main_window_layout)
 
         header = self.__get_header_widget()
         main = self.__get_main_widget()
         bottom = self.__get_bottom_widget()
 
-        main_layout.addWidget(header)
-        main_layout.addWidget(main)
-        main_layout.addWidget(bottom)
+        main_window_layout.addWidget(header)
+        main_window_layout.addWidget(main)
+        main_window_layout.addWidget(bottom)
 
     def __get_header_widget(self) -> QWidget:
         # header
@@ -74,21 +78,33 @@ class PDFWindowVisualization(QWidget):
     def __get_main_widget(self) -> QWidget:
         # visualization of the various pages or the questions before them
         main = QWidget(self)
-        layout = QVBoxLayout()
+
+        self.main_layout = QVBoxLayout()
 
         # TODO: add the management of the questions
 
-        self.question_label = QLabel(main)
+        # self.question_label = QLabel(main)
         self.__update_question(None)
 
-        layout.addWidget(self.question_label)
-        main.setLayout(layout)
+        # self.main_layout.addWidget(self.question_label)
+        main.setLayout(self.main_layout)
         return main
 
     def __get_bottom_widget(self) -> QWidget:
         # bottom
         bottom = QWidget(self)
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
+        layout_current_card = self.__get_current_card_bottom_layout()
+        layout_general = self.__get_general_bottom_layout()
+
+        layout.addLayout(layout_current_card)
+        layout.addLayout(layout_general)
+
+        bottom.setLayout(layout)
+        return bottom
+
+    def __get_current_card_bottom_layout(self) -> QHBoxLayout:
+        layout_current_card = QHBoxLayout()
 
         self.back_button = QPushButton()
         self.back_button.setText("Back")
@@ -102,10 +118,24 @@ class PDFWindowVisualization(QWidget):
             self.is_next_button_disabled = True
         self.next_button.clicked.connect(self.__next_card)
 
-        layout.addWidget(self.back_button)
-        layout.addWidget(self.next_button)
-        bottom.setLayout(layout)
-        return bottom
+        add_page_question = QPushButton()
+        add_page_question.setText("Add question to the card")
+
+        layout_current_card.addWidget(self.back_button)
+        layout_current_card.addWidget(self.next_button)
+        layout_current_card.addWidget(add_page_question)
+
+        return layout_current_card
+
+    def __get_general_bottom_layout(self):
+        layout_general = QHBoxLayout()
+
+        add_general_question = QPushButton()
+        add_general_question.setText("Add general question")
+
+        layout_general.addWidget(add_general_question)
+
+        return layout_general
 
     def __previous_card(self) -> None:
         if self.index_current_page <= 0:
@@ -167,23 +197,37 @@ class PDFWindowVisualization(QWidget):
         #  I prefer to create a single tempdir at the start of the window and closing it at the
         #  closure of the latter
         tmp_dirname = self.tmp_dir.__enter__()
-        file_path = os.path.join(tmp_dirname, "page.pgn")
+        file_path = os.path.join(tmp_dirname, "page.jpg")
         first_page = self.pdf_pages[self.index_current_page]
         # TODO: can be improved with the visualization of the page without passing from disk
-        first_page.save(file_path, "png")
+        first_page.save(file_path, "JPEG")
 
-        pixmap = QPixmap(file_path)
+        # TODO: integrate better the Zoomable Image in this page. I have to remove the book that changes
+        # the pixel position. And I have to make the Zoomable image change the loaded image from this class.
+        # In general I have to understand better how the ZoomableImage was created
+        self.zoomable_image = ZoomableImage(self, file_path)
+        self.main_layout.addWidget(self.zoomable_image)
 
-        # TODO: improve the quality of this action
-        pixmap = pixmap.scaled(
-            BASE_HOME_WIDTH,
-            BASE_HOME_HEIGHT,
-            aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-        )
-        self.question_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.question_label.setPixmap(pixmap)
+        # pixmap = QPixmap(file_path)
+
+        # pixmap = pixmap.scaled(
+        #     BASE_HOME_WIDTH,
+        #     BASE_HOME_HEIGHT,
+        #     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+        #     transformMode=Qt.TransformationMode.SmoothTransformation,
+        # )
+        # # pixmap = pixmap.scaledToHeight(
+        # #     BASE_HOME_HEIGHT, mode=Qt.TransformationMode.SmoothTransformation
+        # # )
+        # self.question_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # self.question_label.setPixmap(pixmap)
 
         return None
+
+    def resizeEvent(self, a0: QResizeEvent) -> None:
+        return_value = super().resizeEvent(a0)
+        self.zoomable_image.fitInView()
+        return return_value
 
     def closeEvent(self, event):
         # add the closure of the tempdir

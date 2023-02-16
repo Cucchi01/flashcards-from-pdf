@@ -120,7 +120,7 @@ class DecksStructure(QTreeWidget):
         path_name = entry_pressed.text(self.path_col)
         full_path = os.path.join(path_name, full_name)
         self.pdf_window = pdf_visualization.PDFWindowVisualization(full_path)
-        self.pdf_window.show()
+        self.pdf_window.showMaximized()
 
     def __create_tree(self) -> None:
         self.__set_style_tree()
