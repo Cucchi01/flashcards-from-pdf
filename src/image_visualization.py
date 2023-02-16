@@ -71,11 +71,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
 
 class ZoomableImage(QtWidgets.QWidget):
-    def __init__(self, parent, path_of_image):
+    def __init__(self, parent):
         super(ZoomableImage, self).__init__(parent)
         self.viewer = PhotoViewer(self)
-        self.path_of_image = path_of_image
-        self.load_image()
 
         # Arrange layout
         v_b_layout = QtWidgets.QVBoxLayout(self)
@@ -84,8 +82,8 @@ class ZoomableImage(QtWidgets.QWidget):
         h_b_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         v_b_layout.addLayout(h_b_layout)
 
-    def load_image(self):
-        self.viewer.set_photo(QtGui.QPixmap(self.path_of_image))
+    def load_image(self, path_of_image):
+        self.viewer.set_photo(QtGui.QPixmap(path_of_image))
 
     def fitInView(self):
         self.viewer.fitInView()

@@ -84,6 +84,8 @@ class PDFWindowVisualization(QWidget):
         # TODO: add the management of the questions
 
         # self.question_label = QLabel(main)
+        self.zoomable_image = ZoomableImage(self)
+        self.main_layout.addWidget(self.zoomable_image)
         self.__update_question(None)
 
         # self.main_layout.addWidget(self.question_label)
@@ -202,11 +204,7 @@ class PDFWindowVisualization(QWidget):
         # TODO: can be improved with the visualization of the page without passing from disk
         first_page.save(file_path, "JPEG")
 
-        # TODO: integrate better the Zoomable Image in this page. I have to remove the book that changes
-        # the pixel position. And I have to make the Zoomable image change the loaded image from this class.
-        # In general I have to understand better how the ZoomableImage was created
-        self.zoomable_image = ZoomableImage(self, file_path)
-        self.main_layout.addWidget(self.zoomable_image)
+        self.zoomable_image.load_image(file_path)
 
         # pixmap = QPixmap(file_path)
 
