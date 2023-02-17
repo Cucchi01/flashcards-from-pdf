@@ -14,7 +14,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
 from application_costants import *
-from decks_structure import DecksStructure
+from decks_tree import DecksStructure
 
 import sys
 

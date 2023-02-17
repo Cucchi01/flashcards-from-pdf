@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-import decks_structure
+import decks_tree
 
 
 class TestRetrivalDeckStructure(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestRetrivalDeckStructure(unittest.TestCase):
         expected_result = {}
         test_folder_path = os.path.join(self.test_root_folder_path, "/01_test")
         self.assertEqual(
-            decks_structure.get_decks_structure_from_disk(test_folder_path),
+            decks_tree.get_decks_structure_from_disk(test_folder_path),
             expected_result,
         )
 
@@ -29,7 +29,7 @@ class TestRetrivalDeckStructure(unittest.TestCase):
         expected_result = {}
         test_folder_path = os.path.join(self.test_root_folder_path, "/02_test")
         self.assertEqual(
-            decks_structure.get_decks_structure_from_disk(test_folder_path),
+            decks_tree.get_decks_structure_from_disk(test_folder_path),
             expected_result,
         )
 
@@ -37,7 +37,7 @@ class TestRetrivalDeckStructure(unittest.TestCase):
         expected_result = {}
         test_folder_path = os.path.join(self.test_root_folder_path, "/03_test")
         self.assertEqual(
-            decks_structure.get_decks_structure_from_disk(test_folder_path),
+            decks_tree.get_decks_structure_from_disk(test_folder_path),
             expected_result,
         )
 
@@ -45,7 +45,7 @@ class TestRetrivalDeckStructure(unittest.TestCase):
         expected_result = {}
         test_folder_path = os.path.join(self.test_root_folder_path, "/04_test")
         self.assertEqual(
-            decks_structure.get_decks_structure_from_disk(test_folder_path),
+            decks_tree.get_decks_structure_from_disk(test_folder_path),
             expected_result,
         )
 
