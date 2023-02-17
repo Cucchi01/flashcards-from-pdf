@@ -10,9 +10,11 @@ class DirectoryEntry:
         self._entry_name = entry_name
 
     def get_type(self):
+        """Returns the type of the entry that this object represents"""
         return self._type
 
     def get_entry_name(self):
+        """Returns the name of the entry that this object represents"""
         return self._entry_name
 
 
@@ -22,6 +24,7 @@ class DirectoryEntryFile(DirectoryEntry):
         self.questions_available = questions_available
 
     def set_questions_available(self, status: bool):
+        """Sets the availability of the questions to a new status"""
         self.questions_available = status
 
 
@@ -29,20 +32,20 @@ class DirectoryEntryFolder(DirectoryEntry):
     def __init__(self, entry_name: str, path: str):
         super().__init__(type=FOLDER, entry_name=entry_name)
         self._path: str = path
-        self.__set_entries()
-
-    def __set_entries(self):
         self._immediate_decks: dict[str, DirectoryEntryFile]
         self._sub_folders: dict[str, DirectoryEntryFolder]
         self._immediate_decks, self._sub_folders = get_entries_from_path(self._path)
 
     def get_immediate_decks(self) -> dict[str, DirectoryEntryFile]:
+        """Returns first levels decks"""
         return self._immediate_decks
 
     def get_immediate_folders(self) -> dict[str, "DirectoryEntryFolder"]:
+        """Returns first levels folders"""
         return self._sub_folders
 
     def get_path(self):
+        """Returns the path of the folder that this object represents"""
         return self._path
 
 
@@ -67,7 +70,7 @@ def get_decks_structure_from_disk(root_folder_path: str) -> DirectoryEntryFolder
 def get_entries_from_path(
     path: str,
 ) -> tuple[dict[str, DirectoryEntryFile], dict[str, DirectoryEntryFolder]]:
-    """Returns the entries of the path provided.
+    """Returns the entries of the provided path.
 
     It is a function used to retrieve the content of a folder containing .pdf and .txt files
 
@@ -79,7 +82,7 @@ def get_entries_from_path(
     Returns
     -------
     tuple[dict[str, DirectoryEntryFile], dict[str, DirectoryEntryFile]]
-        The keys are the filename and the items are either the DirectoryEntryFile in the first case and the DirectoryEntryFolder for the second that are contained in the path.
+    Two dictionaries are returned inside a tuple and for both of them the keys are the filenames. The mapped items are the entries contained in the folder. In the first element there are DirectoryEntryFiles and in the second there are DirectoryEntryFolders.
 
     """
     immediate_decks: dict[str, DirectoryEntryFile] = dict({})
@@ -106,9 +109,9 @@ def process_entry_file(
     Parameters
     ----------
     decks : dict[str, DirectoryEntryFile]
-        The keys are the filename and the items are DirectoryEntryFiles contained in the path
+        The keys are the filenames, and the items are DirectoryEntryFiles contained in the path
     files_processed : set[str]
-        Set containing the filenames already processed in the current folder
+        Set containing the filenames already processed from the current folder
     entry_name : str
         Name of the entry that is going to be processed by the function
 
@@ -149,12 +152,12 @@ def process_entry_folder(
 ) -> None:
     """Process an inner directory.
 
-    It adds the DirectoryEntryFolder to the dictionary containing the folders passed as a parameter. The creation of the sub DirectoryEntryFolder goes on recursively.
+    Adds the DirectoryEntryFolder to the dictionary containing the folders passed as a parameter. The creation of the sub-DirectoryEntryFolder goes on recursively.
 
     Parameters
     ----------
     immediate_folders : dict[str, DirectoryEntryFolder]
-        The keys are directory names and the items the DirectoryEntryFolder contained in the path
+        The keys are directory names, and the items are the DirectoryEntryFolder contained in the path
     path_to_folder : str
         Path to the current entry
     entry_name : str

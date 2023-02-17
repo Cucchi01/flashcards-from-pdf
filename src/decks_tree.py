@@ -13,6 +13,7 @@ import os
 import application_costants
 import pdf_visualization
 from deck_directory import DirectoryEntryFolder, FILE, FOLDER
+from update_pdf import update_pdf
 
 
 class DecksStructure(QTreeWidget):
@@ -126,8 +127,3 @@ class DecksStructure(QTreeWidget):
         child.setIcon(2, icon)
 
         return child
-
-
-# TODO: move this function in the proper fi.e
-def update_pdf(path_pdf_to_update: str):
-    print(path_pdf_to_update)
