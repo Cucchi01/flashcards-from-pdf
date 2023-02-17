@@ -38,7 +38,6 @@ class MainWindow(QWidget):
         main_layout.addWidget(tab, 0, 0, 2, 1)
 
     def __get_tab_widget(self) -> QTabWidget:
-        # create a tab widget
         tab = QTabWidget(self)
         tab.setFont(QFont("Calisto MT", 14))
 
