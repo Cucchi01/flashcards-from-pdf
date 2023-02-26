@@ -16,7 +16,7 @@ import sys
 import os
 import tempfile
 
-from application_costants import *
+from application_constants import *
 from image_visualization import ZoomableImage
 
 

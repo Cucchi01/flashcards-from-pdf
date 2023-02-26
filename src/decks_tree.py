@@ -10,7 +10,7 @@ from PyQt6.QtCore import Qt
 
 import os
 
-import application_costants
+import application_constants
 import pdf_visualization
 from deck_directory import DirectoryEntryFolder, FILE, FOLDER
 from update_pdf import update_pdf
@@ -81,7 +81,7 @@ class DecksStructure(QTreeWidget):
         self.setColumnCount(self.num_col)
         self.setFont(QFont("Calisto MT", 12))
         self.setHeaderLabels(["Name", "Type", "Buttons", "Path"])
-        base_width = application_costants.BASE_HOME_WIDTH // (self.num_col)
+        base_width = application_constants.BASE_HOME_WIDTH // (self.num_col)
         self.header().setDefaultSectionSize(base_width)
 
     def __create_top_level_tree(self):
