@@ -1,6 +1,9 @@
 # VS code
 .vscode
 
+#personal
+private_pdf/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
