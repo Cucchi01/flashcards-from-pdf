@@ -50,9 +50,11 @@ class DecksStructure(QTreeWidget):
         self.menu_right_click.addAction(update_button)
 
     def __open_right_click_menu(self, event) -> None:
-        full_path = self.__get_entry_full_path(self.selectedItems()[0])
-        self.path_pdf_to_update = full_path
-        self.menu_right_click.popup(QCursor.pos())
+        selectedItems = self.selectedItems()
+        if len(selectedItems) > 0:
+            full_path = self.__get_entry_full_path(selectedItems[0])
+            self.path_pdf_to_update = full_path
+            self.menu_right_click.popup(QCursor.pos())
 
     def __update_pdf(self, event) -> None:
         update_pdf(self.path_pdf_to_update)
