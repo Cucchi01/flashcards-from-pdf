@@ -21,6 +21,9 @@ def update_pdf(path_pdf_to_update: str) -> None:
         caption="Open file", filter="*.pdf", directory=os.getcwd()
     )
 
+    if is_path_empty(path_of_new_pdf):
+        return
+
     # compare the pdf on a different thread
     threadpool = QThreadPool()
     worker = Worker(compare_two_pdf_text_only, path_pdf_to_update, path_of_new_pdf)
@@ -31,6 +34,10 @@ def update_pdf(path_pdf_to_update: str) -> None:
 
     # compare_two_pdf_text_only(path_pdf_to_update, path_of_new_pdf)
     # compare_pages(path_pdf_to_update, path_of_new_pdf, 0, 3)
+
+
+def is_path_empty(path: str) -> bool:
+    return path == ""
 
 
 def compare_two_pdf_text_only(
