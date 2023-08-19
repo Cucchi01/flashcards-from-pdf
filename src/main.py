@@ -13,7 +13,12 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
-from application_constants import *
+from application_constants import (
+    APPLICATION_NAME,
+    PATH_TO_DECKS_ABS,
+    BASE_HOME_WIDTH,
+    BASE_HOME_HEIGHT,
+)
 from decks_tree import DecksStructure
 
 import sys
