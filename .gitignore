@@ -3,6 +3,7 @@
 
 #personal
 private_pdf/
+private_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
