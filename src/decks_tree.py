@@ -1,14 +1,9 @@
-from PyQt6.QtWidgets import (
-    QTreeWidget,
-    QTreeWidgetItem,
-    QStyle,
-    QMenu,
-)
+from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QStyle, QMenu, QHeaderView
 from PyQt6.QtGui import QColor, QFont, QAction, QCursor
 from PyQt6.QtCore import Qt
 
-
 import os
+from typing import Optional
 
 import application_constants
 from pdf_visualization import pdf_visualization
@@ -48,7 +43,11 @@ class DecksStructure(QTreeWidget):
         self.setFont(QFont("Calisto MT", 12))
         self.setHeaderLabels(["Name", "Type", "Buttons", "Path"])
         base_width = application_constants.BASE_HOME_WIDTH // (self.num_col)
-        self.header().setDefaultSectionSize(base_width)
+        app: Optional[QHeaderView] = self.header()
+        if app is None:
+            raise ValueError()
+        header: QHeaderView = app
+        header.setDefaultSectionSize(base_width)
 
     def __create_top_level_tree(self) -> None:
         entries = self.__get_subtree(self.root_folder)
@@ -94,7 +93,11 @@ class DecksStructure(QTreeWidget):
         child = QTreeWidgetItem([entry_name, ext, "", path])
 
         pixmapi = getattr(QStyle.StandardPixmap, "SP_MediaPlay")
-        icon = self.style().standardIcon(pixmapi)
+        app: Optional[QStyle] = self.style()
+        if app is None:
+            raise ValueError()
+        style: QStyle = app
+        icon = style.standardIcon(pixmapi)
         child.setIcon(2, icon)
 
         return child
