@@ -11,7 +11,7 @@ from PyQt6.QtCore import Qt
 import os
 
 import application_constants
-import pdf_visualization
+from pdf_visualization import pdf_visualization
 from deck_directory import DirectoryEntryFolder, DirectoryEntryFile, FILE, FOLDER
 from update_pdf import update_pdf
 

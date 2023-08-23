@@ -7,28 +7,32 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSpinBox,
 )
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QPixmap, QResizeEvent
-from pdf2image import convert_from_path
+from PyQt6.QtCore import Qt, QPointF
+from PyQt6.QtGui import QFont, QPixmap, QResizeEvent, QShortcut, QKeySequence
+from PyQt6 import QtPdf, QtPdfWidgets
 from PIL import Image as PILImage
 
 import sys
 import os
 import tempfile
+from typing import Optional
 
 from application_constants import APPLICATION_NAME
-from image_visualization import ZoomableImage
+from pdf_visualization.question import Question
+from pdf_visualization.pdf_page import PdfPage
+from pdf_visualization.card import Card
 
 
 class PDFWindowVisualization(QWidget):
     def __init__(self, path_of_pdf: str) -> None:
         super().__init__()
 
-        # change the CursorShape because it takes a lot of time to load the pdf
+        # change the CursorShape while loading the pdf
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
+        path_without_ext: str
         path_without_ext, _ = os.path.splitext(path_of_pdf)
-        path_of_questions = path_without_ext + ".txt"
+        path_of_questions: str = path_without_ext + ".txt"
 
         is_questions_file_present: bool = os.path.isfile(path_of_questions)
 
@@ -40,25 +44,23 @@ class PDFWindowVisualization(QWidget):
 
         self.path_of_pdf: str = path_of_pdf
         self.filename: str = os.path.basename(path_of_pdf)
-        # TODO: move the retrieval of the images on a different thread. So I can preload all
-        #  the images of the current pdf and then move smoothly between them
-        pdf_pages: list[PILImage.Image] = convert_from_path(self.path_of_pdf, dpi=200)
 
-        self.cards_to_display: list[PILImage.Image | Question]
-        self.num_page_to_index_card: list[int]
-        # the number of the page is 0-based
-        self.index_card_to_num_page: list[int]
+        self.num_pdf_pages: int = get_pdf_page_count(self.path_of_pdf)
+        self.pdf_doc: QtPdf.QPdfDocument
+        self.pdf_nav: QtPdf.QPdfPageNavigator
+
+        self.cards_to_display: list[Card]
+        self.num_pdf_page_to_card_index: list[int]
+        self.num_question_to_card_index: list[int]
         (
             self.cards_to_display,
-            self.num_page_to_index_card,
-            self.index_card_to_num_page,
-        ) = merge_questions_pages(questions, pdf_pages)
+            self.num_pdf_page_to_card_index,
+            self.num_question_to_card_index,
+        ) = merge_cards(questions, self.num_pdf_pages)
 
         self.current_card_index: int = 0
         self.num_cards: int = len(self.cards_to_display)
-        self.num_pdf_pages: int = len(pdf_pages)
-        self.tmp_dir: tempfile.TemporaryDirectory = tempfile.TemporaryDirectory()
-        self.page_num_spinbox: QSpinBox
+        self.pdf_page_num_spinbox: QSpinBox
         self.is_page_spinbox_event_disabled: bool
         self.question_label: QLabel
         self.back_button: QPushButton
@@ -66,7 +68,6 @@ class PDFWindowVisualization(QWidget):
         self.is_back_button_disabled: bool = True
         self.is_next_button_disabled: bool = False
         self.main_layout: QVBoxLayout
-        self.zoomable_image: ZoomableImage
 
         self.__set_window_style()
         self.__set_window_layout()
@@ -80,15 +81,16 @@ class PDFWindowVisualization(QWidget):
         main_window_layout = QVBoxLayout(self)
         self.setLayout(main_window_layout)
 
-        header = self.__get_header_widget()
-        main = self.__get_main_widget()
-        bottom = self.__get_bottom_widget()
+        header = self.__set_header_widget()
+        main = self.__set_main_widget()
+        bottom = self.__set_bottom_widget()
 
         main_window_layout.addWidget(header)
+        # TODO: change the position of the button and put them on the right of the pdf_view. Add some text boxes for creating new questions
         main_window_layout.addWidget(main)
         main_window_layout.addWidget(bottom)
 
-    def __get_header_widget(self) -> QWidget:
+    def __set_header_widget(self) -> QWidget:
         # header
         title = QWidget(self)
         layout = QVBoxLayout()
@@ -101,35 +103,37 @@ class PDFWindowVisualization(QWidget):
         return title
 
     def __get_page_position_layout(self) -> QHBoxLayout:
+        # TODO: add a spinbox for the question number and for the card number. Not only the pdf number
+
         # the num_page stored is 0-based, but the visualization is 1-based numbering
-        num_page: int = self.index_card_to_num_page[self.current_card_index] + 1
+        num_page: int = self.cards_to_display[self.current_card_index].get_pdf_page()
 
         page_pos_layout = QWidget(self)
         layout = QHBoxLayout()
 
         label = QLabel("Pdf page:", page_pos_layout)
-        self.page_num_spinbox = QSpinBox(page_pos_layout)
-        self.page_num_spinbox.setMinimum(1)
-        self.page_num_spinbox.setMaximum(self.num_pdf_pages)
-        self.page_num_spinbox.setValue(num_page)
+        self.pdf_page_num_spinbox = QSpinBox(page_pos_layout)
+        self.pdf_page_num_spinbox.setMinimum(1)
+        self.pdf_page_num_spinbox.setMaximum(self.num_pdf_pages)
+        self.pdf_page_num_spinbox.setValue(num_page)
         self.is_page_spinbox_event_disabled = False
-        self.page_num_spinbox.valueChanged.connect(self.__update_page)
+        self.pdf_page_num_spinbox.valueChanged.connect(self.__update_page)
 
         layout.addWidget(label)
-        layout.addWidget(self.page_num_spinbox)
+        layout.addWidget(self.pdf_page_num_spinbox)
 
         return layout
 
     def __update_page(self) -> None:
         if not self.is_page_spinbox_event_disabled:
-            new_page_num: int = self.page_num_spinbox.value() - 1
+            new_page_num: int = self.pdf_page_num_spinbox.value() - 1
             if new_page_num < 0 or new_page_num >= self.num_pdf_pages:
                 raise ValueError("Page value not valid")
 
-            self.__change_card_index(self.num_page_to_index_card[new_page_num])
+            self.__change_card_index(self.num_pdf_page_to_card_index[new_page_num])
 
-    def __get_main_widget(self) -> QWidget:
-        # visualization of the various pages or the questions before them
+    def __set_main_widget(self) -> QWidget:
+        # visualization of the various pages or the questions before them, one at the time
         main = QWidget(self)
 
         self.main_layout = QVBoxLayout()
@@ -140,20 +144,42 @@ class PDFWindowVisualization(QWidget):
         self.question_label.setVisible(False)
         self.question_label.setText("")
 
-        self.zoomable_image = ZoomableImage(self)
-        self.main_layout.addWidget(self.zoomable_image)
+        self.pdf_view = QtPdfWidgets.QPdfView(self)
+        self.pdf_view.setPageMode(QtPdfWidgets.QPdfView.PageMode.SinglePage)
+        self.pdf_view.setZoomMode(QtPdfWidgets.QPdfView.ZoomMode.Custom)
+        self.shortcut_zoom_increase = QShortcut(QKeySequence("Ctrl++"), self)
+        self.shortcut_zoom_increase.activated.connect(self.__increase_zoom)
+        self.shortcut_zoom_decrease = QShortcut(QKeySequence("Ctrl+-"), self)
+        self.shortcut_zoom_decrease.activated.connect(self.__decrease_zoom)
+        self.main_layout.addWidget(self.pdf_view)
+
+        self.pdf_doc = QtPdf.QPdfDocument(self)
+        self.pdf_doc.load(self.path_of_pdf)
+        self.pdf_view.setDocument(self.pdf_doc)
+
+        app: Optional[QtPdf.QPdfPageNavigator]
+        app = self.pdf_view.pageNavigator()
+        if app is None:
+            raise Exception("No page navigator")
+        self.pdf_nav = app
+        self.point = QPointF(0, 0)
+        self.pdf_nav.jump(0, self.point)
+
         self.__update_card(None)
 
         self.main_layout.addWidget(self.question_label)
         main.setLayout(self.main_layout)
         return main
 
-    def __get_bottom_widget(self) -> QWidget:
+    def __load_pdf_doc(self, path_of_pdf: str) -> None:
+        self.pdf_doc.load(path_of_pdf)
+
+    def __set_bottom_widget(self) -> QWidget:
         # bottom
         bottom = QWidget(self)
         layout = QVBoxLayout()
-        layout_current_card = self.__get_current_card_bottom_layout()
-        layout_general = self.__get_general_bottom_layout()
+        layout_current_card = self.__set_current_card_bottom_layout()
+        layout_general = self.__set_general_bottom_layout()
 
         layout.addLayout(layout_current_card)
         layout.addLayout(layout_general)
@@ -161,7 +187,7 @@ class PDFWindowVisualization(QWidget):
         bottom.setLayout(layout)
         return bottom
 
-    def __get_current_card_bottom_layout(self) -> QHBoxLayout:
+    def __set_current_card_bottom_layout(self) -> QHBoxLayout:
         layout_current_card = QHBoxLayout()
 
         self.back_button = QPushButton()
@@ -185,7 +211,7 @@ class PDFWindowVisualization(QWidget):
 
         return layout_current_card
 
-    def __get_general_bottom_layout(self):
+    def __set_general_bottom_layout(self):
         layout_general = QHBoxLayout()
 
         add_general_question = QPushButton()
@@ -194,6 +220,9 @@ class PDFWindowVisualization(QWidget):
         layout_general.addWidget(add_general_question)
 
         return layout_general
+
+    def __get_number_of_pdf_pages(self) -> int:
+        return self.pdf_doc.pageCount()
 
     def __previous_card(self) -> None:
         if self.current_card_index <= 0:
@@ -227,10 +256,12 @@ class PDFWindowVisualization(QWidget):
 
     def __update_page_pos_layout(self) -> None:
         # the pages are 0-based, but the visualization is 1-based
-        page_index: int = self.index_card_to_num_page[self.current_card_index] + 1
+        page_index: int = (
+            self.cards_to_display[self.current_card_index].get_pdf_page() + 1
+        )
 
         self.is_page_spinbox_event_disabled = True
-        self.page_num_spinbox.setValue(page_index)
+        self.pdf_page_num_spinbox.setValue(page_index)
         self.is_page_spinbox_event_disabled = False
 
     def __update_back_btn_state(self) -> None:
@@ -255,56 +286,28 @@ class PDFWindowVisualization(QWidget):
             self.next_button.setDisabled(False)
             self.is_next_button_disabled = False
 
-    def __update_card(self, event) -> IndexError | None:
+    def __update_card(self, event) -> None:
         if self.current_card_index < 0 or self.current_card_index >= self.num_cards:
-            print("Error: not existing card")
-            return IndexError()
+            raise IndexError("Error: not existing card")
 
-        #  The design choice of the creator of tempdir is to open the tmp_dir with with .. as dirname.
-        #  I prefer to create a single tempdir at the start of the window and closing it at the
-        #  closure of the latter
-        element_to_display: PILImage.Image | Question = self.cards_to_display[
-            self.current_card_index
-        ]
-        if isinstance(element_to_display, PILImage.Image):
+        element_to_display: Card = self.cards_to_display[self.current_card_index]
+        if isinstance(element_to_display, PdfPage):
             self.question_label.setVisible(False)
-            self.zoomable_image.setVisible(True)
-            tmp_dirname = self.tmp_dir.__enter__()
-            file_path = os.path.join(tmp_dirname, "page.jpg")
-            # TODO: can be improved with the visualization of the page without passing from disk
-            element_to_display.save(file_path, "JPEG")
-
-            self.zoomable_image.load_image(file_path)
-        else:
-            self.zoomable_image.setVisible(False)
+            self.pdf_nav.jump(element_to_display.get_pdf_page(), self.point)
+            self.pdf_view.setVisible(True)
+        elif isinstance(element_to_display, Question):
+            self.pdf_view.setVisible(False)
             self.question_label.setText(element_to_display.question)
             self.question_label.setVisible(True)
-
+        else:
+            raise TypeError("Class type is different from what is expected")
         return None
 
-    def resizeEvent(self, a0: QResizeEvent) -> None:
-        return_value = super().resizeEvent(a0)
-        self.zoomable_image.fitInView()
-        return return_value
+    def __increase_zoom(self) -> None:
+        self.pdf_view.setZoomFactor(self.pdf_view.zoomFactor() * 1.25)
 
-    def closeEvent(self, event):
-        # add the closure of the tempdir
-        self.tmp_dir.cleanup()
-        super().closeEvent(event)
-
-
-class Question:
-    def __init__(
-        self,
-        num_page: int = 0,
-        question: str = "",
-        answer: str = "",
-        type_quest: str = "g",
-    ) -> None:
-        self.num_page: int = num_page
-        self.type: str = type_quest
-        self.question: str = question
-        self.answer: str = answer
+    def __decrease_zoom(self) -> None:
+        self.pdf_view.setZoomFactor(self.pdf_view.zoomFactor() / 1.25)
 
 
 def get_questions(path_of_file: str) -> dict[int, list[Question]]:
@@ -353,9 +356,9 @@ def get_questions(path_of_file: str) -> dict[int, list[Question]]:
     return questions
 
 
-def merge_questions_pages(
-    questions_per_page: dict[int, list[Question]], pdf_pages: list[PILImage.Image]
-) -> tuple[list[PILImage.Image | list[Question]], list[int], list[int]]:
+def merge_cards(
+    questions_per_page: dict[int, list[Question]], num_pdf_pages: int
+) -> tuple[list[Card], list[int], list[int]]:
     """Merge the questions and the pages in the correct order.
 
     It orders the questions and the pdf pages in a unique list that matches the visualization outcome.
@@ -364,45 +367,55 @@ def merge_questions_pages(
     ----------
     questions_per_page : dict[int, list[Question]]
         The key is a page number, and the corresponding items are the questions for that page.
-    pdf_pages : list[PILImage.Image]
-        List of the pdf images.
+    num_pdf_pages : int
+        The number of pages in the pdf visualized.
 
     Returns
     -------
-    tuple[list[PILImage.Image | list[Question]], list[int], list[int]]
-    The first returned parameter is a list containing the merged elements. The second element is a vector that stores for each page number the corresponding visualization position. The last returned value does the opposite.
+    tuple[list[Card]], list[int], list[int]]
+    The first returned parameter is a list of all ordered cards to be displayed. The second element is a vector that stores for each pdf page number the corresponding visualization position. The last returned value does the same with questions.
 
     """
-    # TODO: restructure the code
-    num_card_with_quests: int = len(questions_per_page)
-    num_tot: int = num_card_with_quests + len(pdf_pages)
-    positions_card_questions: list[int] = sorted(questions_per_page.keys())
-    num_page_to_card_index: list[int] = []
-    index_card_to_num_page: list[int] = []
+    # sort the questions by page number, same page number leaves the order that there was before. In this way the order in which the user put the questions is left
+    questions_per_page = dict(sorted(questions_per_page.items(), key=lambda x: x[0]))
+    questions: list[Question] = list(questions_per_page.values())
+    num_questions: int = len(questions_per_page.values())
+    num_cards: int = num_questions + num_pdf_pages
 
-    merged_cards: list[PILImage.Image | list[Question]] = []
+    card_pos: int
+    index_quest_to_add: int = 0
+    index_pdf_page_to_add: int = 0
 
-    index_quests: int = 0
-    index_pdf_page: int = 0
-    card_pos: int = 0
-    for _ in range(num_tot):
-        if (
-            index_quests < len(positions_card_questions)
-            and positions_card_questions[index_quests] <= index_pdf_page
+    num_pdf_page_to_card_index: list[int] = []
+    num_question_to_card_index: list[int] = []
+    merged_cards: list[Card] = []
+    for card_pos in range(0, num_cards, 1):
+        card: Card
+        if index_quest_to_add == num_questions:
+            card = PdfPage(index_pdf_page_to_add)
+            num_pdf_page_to_card_index.append(len(merged_cards))
+            index_pdf_page_to_add += 1
+        elif index_pdf_page_to_add == num_pdf_pages:
+            card = questions[index_quest_to_add]
+            num_question_to_card_index.append(len(merged_cards))
+            index_quest_to_add += 1
+        elif (
+            questions[index_quest_to_add].get_reference_page() <= index_pdf_page_to_add
         ):
-            pos_next_quest = positions_card_questions[index_quests]
-            for quest in questions_per_page[pos_next_quest]:
-                merged_cards.append(quest)
-                index_card_to_num_page.append(index_pdf_page)
-                card_pos += 1
-
-            index_quests += 1
+            card = questions[index_quest_to_add]
+            num_question_to_card_index.append(len(merged_cards))
+            index_quest_to_add += 1
         else:
-            merged_cards.append(pdf_pages[index_pdf_page])
-            index_card_to_num_page.append(index_pdf_page)
-            # hashmap that stores the position of a card in the visualization
-            num_page_to_card_index.append(card_pos)
-            index_pdf_page += 1
-            card_pos += 1
+            card = PdfPage(index_pdf_page_to_add)
+            num_pdf_page_to_card_index.append(len(merged_cards))
+            index_pdf_page_to_add += 1
+        merged_cards.append(card)
 
-    return (merged_cards, num_page_to_card_index, index_card_to_num_page)
+    return (merged_cards, num_pdf_page_to_card_index, num_question_to_card_index)
+
+
+# TODO: move the function in a better place
+def get_pdf_page_count(path_to_pdf: str) -> int:
+    pdf_doc = QtPdf.QPdfDocument(None)
+    pdf_doc.load(path_to_pdf)
+    return pdf_doc.pageCount()
