@@ -6,9 +6,18 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QSpinBox,
+    QPlainTextEdit,
 )
 from PyQt6.QtCore import Qt, QPointF
-from PyQt6.QtGui import QFont, QPixmap, QResizeEvent, QShortcut, QKeySequence
+from PyQt6.QtGui import (
+    QFont,
+    QPixmap,
+    QResizeEvent,
+    QShortcut,
+    QKeySequence,
+    QIcon,
+    QFont,
+)
 from PyQt6 import QtPdf, QtPdfWidgets
 from PIL import Image as PILImage
 
@@ -78,17 +87,21 @@ class PDFWindowVisualization(QWidget):
         self.setWindowTitle(APPLICATION_NAME)
 
     def __set_window_layout(self) -> None:
-        main_window_layout = QVBoxLayout(self)
-        self.setLayout(main_window_layout)
+        # TODO: change the position of the button and put them on the right of the pdf_view. Add some text boxes for creating new questions
+        window_layout: QVBoxLayout = QVBoxLayout(self)
+        self.setLayout(window_layout)
 
         header = self.__set_header_widget()
-        main = self.__set_main_widget()
+        main_layout: QHBoxLayout = QHBoxLayout(self)
+        left_panel = self.__set_left_panel_widget()
+        right_panel = self.__set_right_panel_widget()
         bottom = self.__set_bottom_widget()
 
-        main_window_layout.addWidget(header)
-        # TODO: change the position of the button and put them on the right of the pdf_view. Add some text boxes for creating new questions
-        main_window_layout.addWidget(main)
-        main_window_layout.addWidget(bottom)
+        window_layout.addWidget(header)
+        main_layout.addWidget(left_panel, stretch=4)
+        main_layout.addWidget(right_panel, stretch=1)
+        window_layout.addLayout(main_layout)
+        window_layout.addWidget(bottom)
 
     def __set_header_widget(self) -> QWidget:
         # header
@@ -119,7 +132,19 @@ class PDFWindowVisualization(QWidget):
         self.is_page_spinbox_event_disabled = False
         self.pdf_page_num_spinbox.valueChanged.connect(self.__update_page)
 
+        self.back_page_button = QPushButton()
+        self.back_page_button.setText("Previous Page")
+        self.back_page_button.setDisabled(True)
+        # self.back_page_button.clicked.connect(self.__previous_card)
+
+        self.next_page_button = QPushButton()
+        self.next_page_button.setText("Next Page")
+        self.next_page_button.setDisabled(True)
+        # self.next_page_button.clicked.connect(self.__previous_card)
+
         layout.addWidget(label)
+        layout.addWidget(self.back_page_button)
+        layout.addWidget(self.next_page_button)
         layout.addWidget(self.pdf_page_num_spinbox)
 
         return layout
@@ -132,7 +157,7 @@ class PDFWindowVisualization(QWidget):
 
             self.__change_card_index(self.num_pdf_page_to_card_index[new_page_num])
 
-    def __set_main_widget(self) -> QWidget:
+    def __set_left_panel_widget(self) -> QWidget:
         # visualization of the various pages or the questions before them, one at the time
         main = QWidget(self)
 
@@ -174,15 +199,41 @@ class PDFWindowVisualization(QWidget):
     def __load_pdf_doc(self, path_of_pdf: str) -> None:
         self.pdf_doc.load(path_of_pdf)
 
+    def __set_right_panel_widget(self) -> QWidget:
+        # bottom
+        bottom = QWidget(self)
+        layout = QVBoxLayout()
+
+        layout.addWidget(QLabel("Question:"))
+        self.question_input = QPlainTextEdit("")
+        self.question_input.setMaximumWidth
+        layout.addWidget(self.question_input)
+        layout.addWidget(QLabel("Answer:"))
+        self.answer_input = QPlainTextEdit("")
+        layout.addWidget(self.answer_input)
+
+        layout_general = self.__set_add_question_button_layout()
+
+        layout.addLayout(layout_general)
+
+        bottom.setLayout(layout)
+        return bottom
+
     def __set_bottom_widget(self) -> QWidget:
         # bottom
         bottom = QWidget(self)
         layout = QVBoxLayout()
+
         layout_current_card = self.__set_current_card_bottom_layout()
-        layout_general = self.__set_general_bottom_layout()
+        layout_current_question_correctness = (
+            self.__set_current_question_bottom_layout()
+        )
+
+        # layout_general = self.__set_general_bottom_layout()
 
         layout.addLayout(layout_current_card)
-        layout.addLayout(layout_general)
+        layout.addLayout(layout_current_question_correctness)
+        # layout.addLayout(layout_general)
 
         bottom.setLayout(layout)
         return bottom
@@ -190,33 +241,85 @@ class PDFWindowVisualization(QWidget):
     def __set_current_card_bottom_layout(self) -> QHBoxLayout:
         layout_current_card = QHBoxLayout()
 
+        bold_font = QFont()
+        bold_font.setBold(True)
+
+        # TODO: handle previous and next question button
+        self.back_question_button = QPushButton()
+        self.back_question_button.setText("|< Previous question")
+        self.back_question_button.setFont(bold_font)
+        self.back_question_button.setDisabled(True)
+        # self.back_question_button.clicked.connect(self.__previous_card)
+
         self.back_button = QPushButton()
-        self.back_button.setText("Back")
+        self.back_button.setText("<< Back")
         self.back_button.setDisabled(True)
         self.back_button.clicked.connect(self.__previous_card)
 
         self.next_button = QPushButton()
-        self.next_button.setText("Next")
+        self.next_button.setText("Next >>")
         if self.num_cards == 1:
             self.next_button.setDisabled(True)
             self.is_next_button_disabled = True
         self.next_button.clicked.connect(self.__next_card)
 
-        add_page_question = QPushButton()
-        add_page_question.setText("Add question to the card")
+        self.next_question_button = QPushButton()
+        self.next_question_button.setText("Next question >|")
+        self.next_question_button.setFont(bold_font)
+        self.next_question_button.setDisabled(True)
+        # self.next_question_button.clicked.connect(self.__previous_card)
 
+        layout_current_card.addWidget(self.back_question_button)
         layout_current_card.addWidget(self.back_button)
         layout_current_card.addWidget(self.next_button)
-        layout_current_card.addWidget(add_page_question)
+        layout_current_card.addWidget(self.next_question_button)
 
         return layout_current_card
 
-    def __set_general_bottom_layout(self):
-        layout_general = QHBoxLayout()
+    def __set_current_question_bottom_layout(self) -> QHBoxLayout:
+        # TODO: manage correct and mistake answers
+        layout_current_card = QHBoxLayout()
 
+        self.mistake_button = QPushButton()
+        self.mistake_button.setText("Still Learning")
+        self.mistake_button.setDisabled(True)
+        self.mistake_button.setStyleSheet(
+            """
+            QPushButton {background-color: #C70039; padding:2.495px; border: 0.5px solid #bfbfbf;}
+            QPushButton:disabled {background-color: #CCCCCC; padding:2.495px; border: 0.5px solid #bfbfbf;}
+            """
+        )
+        # self.mistake_button.clicked.connect(self.__previous_card)
+
+        self.correct_button = QPushButton()
+        self.correct_button.setText("Know")
+        self.correct_button.setDisabled(True)
+        self.correct_button.setStyleSheet(
+            """
+            QPushButton {background-color: #82CD47; padding:2.495px; border: 0.5px solid #bfbfbf;}
+            QPushButton:disabled {background-color: #CCCCCC; padding:2.495px; border: 0.5px solid #bfbfbf;}
+            """
+        )
+        # self.correct_button.clicked.connect(self.__next_card)
+
+        # add_page_question = QPushButton()
+        # add_page_question.setText("Add question to the card")
+
+        layout_current_card.addWidget(self.mistake_button)
+        layout_current_card.addWidget(self.correct_button)
+        # layout_current_card.addWidget(add_page_question)
+
+        return layout_current_card
+
+    def __set_add_question_button_layout(self):
+        layout_general = QVBoxLayout()
+
+        add_page_question = QPushButton()
+        add_page_question.setText("Add question")
         add_general_question = QPushButton()
         add_general_question.setText("Add general question")
 
+        layout_general.addWidget(add_page_question)
         layout_general.addWidget(add_general_question)
 
         return layout_general
