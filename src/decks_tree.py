@@ -22,7 +22,7 @@ class DecksStructure(QTreeWidget):
         # col = app.takeChild(self.num_col - self.num_hidden_col)
         # col.setHidden(True)
         self.__set_menu_right_click()
-        self.itemDoubleClicked.connect(self.__on_emtry_double_clicked)
+        self.itemDoubleClicked.connect(self.__on_entry_double_clicked)
 
     def __set_state_variable(self, path: str) -> None:
         self.num_col: int = 4
@@ -130,12 +130,14 @@ class DecksStructure(QTreeWidget):
     def __update_pdf(self, event) -> None:
         update_pdf(self.path_pdf_to_update)
 
-    def __on_emtry_double_clicked(
+    def __on_entry_double_clicked(
         self, entry_pressed: QTreeWidgetItem, col_pressed: int
     ) -> None:
         full_path: str = self.__get_entry_full_path(entry_pressed)
-        self.pdf_window = pdf_visualization.PDFWindowVisualization(full_path)
-        self.pdf_window.showMaximized()
+        app = full_path.strip().lower()[-4:]
+        if app == ".pdf":
+            self.pdf_window = pdf_visualization.PDFWindowVisualization(full_path)
+            self.pdf_window.showMaximized()
 
     def __get_entry_full_path(self, entry: QTreeWidgetItem) -> str:
         name_col = 0
