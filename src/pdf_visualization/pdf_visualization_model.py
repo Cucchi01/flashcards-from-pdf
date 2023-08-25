@@ -171,10 +171,9 @@ class PDFWindowVisualizationModel:
             )
             self.__window_layout.get_pdf_view().setVisible(True)
         elif isinstance(element_to_display, Question):
+            quest: Question = element_to_display
             self.__window_layout.get_pdf_view().setVisible(False)
-            self.__window_layout.get_question_label().setText(
-                element_to_display.question
-            )
+            self.__window_layout.get_question_label().setText(quest.get_question())
             self.__window_layout.get_question_label().setVisible(True)
         else:
             raise TypeError("Class type is different from what is expected")
@@ -213,15 +212,19 @@ def get_questions(path_of_file: str) -> dict[int, list[Question]]:
                             type_quest: str = string.strip()
                             if num_page in pages_with_questions:
                                 questions[num_page].append(
-                                    Question(num_page, question, answer, type_quest)
+                                    Question(question, answer, type_quest, [], num_page)
                                 )
                             else:
                                 questions[num_page] = [
-                                    Question(num_page, question, answer, type_quest)
+                                    Question(question, answer, type_quest, [], num_page)
                                 ]
                                 pages_with_questions.add(num_page)
 
                             num_col = -1
+                        case 4:
+                            # Past results
+                            # TODO: manage past results
+                            pass
 
                     string = ""
                 else:
@@ -252,8 +255,11 @@ def merge_cards(
     """
     # sort the questions by page number, same page number leaves the order that there was before. In this way the order in which the user put the questions is left
     questions_per_page = dict(sorted(questions_per_page.items(), key=lambda x: x[0]))
-    questions: list[Question] = list(questions_per_page.values())
-    num_questions: int = len(questions_per_page.values())
+    questions: list[Question] = []
+    for app in questions_per_page.values():
+        questions.extend(app)
+
+    num_questions: int = len(questions)
     num_cards: int = num_questions + num_pdf_pages
 
     card_pos: int
@@ -274,7 +280,9 @@ def merge_cards(
             num_question_to_card_index.append(len(merged_cards))
             index_quest_to_add += 1
         elif (
-            questions[index_quest_to_add].get_reference_page() <= index_pdf_page_to_add
+            questions[index_quest_to_add].get_reference_page()
+            - 1  # reference page start from 1 and not 0
+            <= index_pdf_page_to_add
         ):
             card = questions[index_quest_to_add]
             num_question_to_card_index.append(len(merged_cards))

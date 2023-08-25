@@ -46,3 +46,6 @@ class Question(Card):
 
     def get_pdf_page(self) -> int:
         return self.get_reference_page()
+
+    def get_question(self) -> str:
+        return self.question
