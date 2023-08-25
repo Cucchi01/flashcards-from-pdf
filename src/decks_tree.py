@@ -6,7 +6,8 @@ import os
 from typing import Optional
 
 import application_constants
-from pdf_visualization import pdf_visualization
+from pdf_visualization.pdf_visualization_control import PDFWindowVisualizationControl
+from pdf_visualization.pdf_visualization_layout import PDFWindowVisualizationLayout
 from deck_directory import DirectoryEntryFolder, DirectoryEntryFile, FILE, FOLDER
 from update_pdf import update_pdf
 
@@ -30,7 +31,7 @@ class DecksStructure(QTreeWidget):
         self.root_folder: DirectoryEntryFolder = DirectoryEntryFolder(
             entry_name="root", path=path
         )
-        self.pdf_window: pdf_visualization.PDFWindowVisualization
+        self.pdf_window_control: PDFWindowVisualizationControl
         self.menu_right_click: QMenu
         self.path_pdf_to_update: str
 
@@ -136,8 +137,8 @@ class DecksStructure(QTreeWidget):
         full_path: str = self.__get_entry_full_path(entry_pressed)
         app = full_path.strip().lower()[-4:]
         if app == ".pdf":
-            self.pdf_window = pdf_visualization.PDFWindowVisualization(full_path)
-            self.pdf_window.showMaximized()
+            self.pdf_window_control = PDFWindowVisualizationControl(full_path)
+            self.pdf_window_control.get_pdf_window_visualization_layout().showMaximized()
 
     def __get_entry_full_path(self, entry: QTreeWidgetItem) -> str:
         name_col = 0
