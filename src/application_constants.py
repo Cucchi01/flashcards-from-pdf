@@ -9,3 +9,9 @@ BASE_HOME_WIDTH = 800
 BASE_HOME_HEIGHT = 600
 # TODO: make it choose the right language for the pdf
 LANGUAGE = "italian"
+
+# file
+TYPE_QUEST_GENERAL_CONSTANT = "g"
+TYPE_QUEST_PAGE_SPECIFIC_CONSTANT = "p"
+ONGOING_TEST_FLAG_YES = "1"
+ONGOING_TEST_FLAG_NO = "0"

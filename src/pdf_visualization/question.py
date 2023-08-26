@@ -9,7 +9,8 @@ class Question(Card):
 
     class Result(Enum):
         ERROR = 0
-        TRUE = 1
+        NOT_DONE = 1
+        TRUE = 2
 
     def __init__(
         self,
@@ -18,6 +19,7 @@ class Question(Card):
         question_type: QuestionType = QuestionType.GENERIC,
         past_results: list[Result] = list(),
         reference_page: int = 0,
+        current_result: Result = Result.NOT_DONE,
     ) -> None:
         super().__init__()
         self.set_question(question)
@@ -25,6 +27,7 @@ class Question(Card):
         self.set_question_type(question_type)
         self.set_past_results(past_results)
         self.set_reference_page(reference_page)
+        self.set_current_result(current_result)
 
     def set_question(self, question: str) -> None:
         self.question: str = question
@@ -40,6 +43,9 @@ class Question(Card):
 
     def set_reference_page(self, reference_page: int = 0) -> None:
         self.reference_page: int = reference_page
+
+    def set_current_result(self, current_result: Result = Result.NOT_DONE) -> None:
+        self.current_result: Question.Result = current_result
 
     def get_reference_page(self) -> int:
         return self.reference_page

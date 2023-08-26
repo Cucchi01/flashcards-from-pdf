@@ -3,11 +3,14 @@ from PyQt6.QtCore import Qt, QPointF
 from PyQt6 import QtPdf, QtPdfWidgets
 
 import os
+from io import TextIOWrapper
 
 from pdf_visualization.pdf_visualization_layout import PDFWindowVisualizationLayout
 from pdf_visualization.question import Question
 from pdf_visualization.pdf_page import PdfPage
 from pdf_visualization.card import Card
+from application_constants import TYPE_QUEST_PAGE_SPECIFIC_CONSTANT
+from application_constants import ONGOING_TEST_FLAG_YES
 
 
 class PDFWindowVisualizationModel:
@@ -186,6 +189,14 @@ class PDFWindowVisualizationModel:
 def get_questions(path_of_file: str) -> dict[int, list[Question]]:
     questions: dict[int, list[Question]] = dict()
     with open(path_of_file, "r") as file:
+        skip_history_tests(file)
+
+        # check ongoing test
+        # TODO: manage ongoing test
+        ongoing_test: bool = False
+        if file.readline().strip() == ONGOING_TEST_FLAG_YES:
+            ongoing_test = True
+
         num_col: int = -1
         num_questions: int = int(file.readline())
         pages_with_questions = set()
@@ -209,28 +220,72 @@ def get_questions(path_of_file: str) -> dict[int, list[Question]]:
 
                         case 3:
                             # Type
-                            type_quest: str = string.strip()
+                            type_quest_str: str = string.strip()
+                            type_quest: Question.QuestionType
+                            if type_quest_str == TYPE_QUEST_PAGE_SPECIFIC_CONSTANT:
+                                type_quest = Question.QuestionType.PAGE_SPECIFIC
+                            else:
+                                type_quest = Question.QuestionType.GENERIC
+
+                        case 4:
+                            # Past results
+                            char: str
+                            results: list[bool] = []
+                            for char in string.strip():
+                                if char == "1":
+                                    results.append(True)
+                                else:
+                                    results.append(False)
+
+                        case 5:
+                            current_result: Question.Result = Question.Result.NOT_DONE
+                            if string.strip() != "" and ongoing_test:
+                                match int(string.strip()):
+                                    case Question.Result.ERROR.value:
+                                        current_result = Question.Result.ERROR
+                                    case Question.Result.NOT_DONE.value:
+                                        current_result = Question.Result.NOT_DONE
+                                    case Question.Result.TRUE.value:
+                                        current_result = Question.Result.TRUE
+
+                            # Adding question
                             if num_page in pages_with_questions:
                                 questions[num_page].append(
-                                    Question(question, answer, type_quest, [], num_page)
+                                    Question(
+                                        question,
+                                        answer,
+                                        type_quest,
+                                        results,
+                                        num_page,
+                                        current_result,
+                                    )
                                 )
                             else:
                                 questions[num_page] = [
-                                    Question(question, answer, type_quest, [], num_page)
+                                    Question(
+                                        question,
+                                        answer,
+                                        type_quest,
+                                        results,
+                                        num_page,
+                                        current_result,
+                                    )
                                 ]
                                 pages_with_questions.add(num_page)
 
                             num_col = -1
-                        case 4:
-                            # Past results
-                            # TODO: manage past results
-                            pass
 
                     string = ""
                 else:
                     string = " ".join([string, word])
 
     return questions
+
+
+def skip_history_tests(file: TextIOWrapper) -> None:
+    num_completed_tests: int = int(file.readline())
+    for i in range(0, num_completed_tests):
+        file.readline()
 
 
 def merge_cards(
