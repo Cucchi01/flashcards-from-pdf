@@ -1,5 +1,7 @@
 import os
 
+from PyQt6.QtGui import QFont
+
 APPLICATION_NAME = "Flashcards from PDF"
 PATH_TO_DECKS_FROM_SRC = "../data/"
 PATH_TO_DECKS_ABS = os.path.abspath(
@@ -9,6 +11,8 @@ BASE_HOME_WIDTH = 800
 BASE_HOME_HEIGHT = 600
 # TODO: make it choose the right language for the pdf
 LANGUAGE = "italian"
+APPLICATION_STYLE = 'QWidget {font: "Calisto MT", size: 14}'
+FONT = QFont("Calisto MT", 14)
 
 # file
 TYPE_QUEST_GENERAL_CONSTANT = "g"

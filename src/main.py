@@ -18,6 +18,8 @@ from application_constants import (
     PATH_TO_DECKS_ABS,
     BASE_HOME_WIDTH,
     BASE_HOME_HEIGHT,
+    APPLICATION_STYLE,
+    FONT,
 )
 from decks_tree import DecksStructure
 
@@ -44,7 +46,6 @@ class MainWindow(QWidget):
 
     def __get_tab_widget(self) -> QTabWidget:
         tab = QTabWidget(self)
-        tab.setFont(QFont("Calisto MT", 14))
 
         deck_tab = self.__get_tab_decks()
         stats_tab = self.__get_tab_stats()
@@ -77,5 +78,7 @@ class MainWindow(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyleSheet(APPLICATION_STYLE)
+    app.setFont(FONT)
     window = MainWindow()
     sys.exit(app.exec())

@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSpinBox,
     QPlainTextEdit,
+    QCheckBox,
 )
 from PyQt6.QtCore import Qt, QPointF
 from PyQt6.QtGui import QFont
@@ -28,6 +29,7 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__pdf_page_num_spinbox: QSpinBox
         self.__back_page_button: QPushButton
         self.__next_page_button: QPushButton
+        self.__advanced_options_button: QPushButton
 
         # main
         # left panel
@@ -40,6 +42,7 @@ class PDFWindowVisualizationLayout(QWidget):
         # right panel
         self.__question_input: QPlainTextEdit
         self.__answer_input: QPlainTextEdit
+        self.__page_specific_checkbox: QCheckBox
         self.__add_page_question: QPushButton
         self.__add_general_question: QPushButton
 
@@ -93,12 +96,6 @@ class PDFWindowVisualizationLayout(QWidget):
         page_pos_layout = QWidget(self)
         layout = QHBoxLayout()
 
-        label = QLabel("Pdf page:", page_pos_layout)
-        self.__pdf_page_num_spinbox = QSpinBox(page_pos_layout)
-        self.__pdf_page_num_spinbox.setMinimum(1)
-        self.__pdf_page_num_spinbox.setMaximum(self.__num_pdf_pages)
-        self.__pdf_page_num_spinbox.setValue(self.__num_page)
-
         self.__back_page_button = QPushButton()
         self.__back_page_button.setText("Previous Page")
         self.__back_page_button.setDisabled(True)
@@ -107,10 +104,21 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__next_page_button.setText("Next Page")
         self.__next_page_button.setDisabled(True)
 
-        layout.addWidget(label)
+        label = QLabel("Pdf page:", page_pos_layout)
+        self.__pdf_page_num_spinbox = QSpinBox(page_pos_layout)
+        self.__pdf_page_num_spinbox.setMinimum(1)
+        self.__pdf_page_num_spinbox.setMaximum(self.__num_pdf_pages)
+        self.__pdf_page_num_spinbox.setValue(self.__num_page)
+
+        self.__advanced_options_button = QPushButton()
+        self.__advanced_options_button.setText("Advanced options")
+        self.__advanced_options_button.setDisabled(True)
+
         layout.addWidget(self.__back_page_button)
         layout.addWidget(self.__next_page_button)
+        layout.addWidget(label)
         layout.addWidget(self.__pdf_page_num_spinbox)
+        layout.addWidget(self.__advanced_options_button)
 
         return layout
 
@@ -148,33 +156,31 @@ class PDFWindowVisualizationLayout(QWidget):
         bottom = QWidget(self)
         layout = QVBoxLayout()
 
-        layout.addWidget(QLabel("Question:"))
+        question_label = QLabel("Question:")
         self.__question_input = QPlainTextEdit("")
-        self.__question_input.setMaximumWidth
-        layout.addWidget(self.__question_input)
-        layout.addWidget(QLabel("Answer:"))
         self.__answer_input = QPlainTextEdit("")
+        answer_label = QLabel("Answer:")
+        self.__page_specific_checkbox = QCheckBox("Page specific")
+        self.__page_specific_checkbox.setChecked(True)
+
+        layout.addWidget(question_label)
+        layout.addWidget(self.__question_input)
+        layout.addWidget(answer_label)
         layout.addWidget(self.__answer_input)
-
-        layout_general = self.__set_add_question_button_layout()
-
-        layout.addLayout(layout_general)
+        layout.addWidget(self.__page_specific_checkbox)
+        self.__add_question_buttons(layout)
 
         bottom.setLayout(layout)
         return bottom
 
-    def __set_add_question_button_layout(self) -> QVBoxLayout:
-        layout_general = QVBoxLayout()
-
+    def __add_question_buttons(self, layout: QVBoxLayout) -> None:
         self.__add_page_question = QPushButton()
         self.__add_page_question.setText("Add question")
         self.__add_general_question = QPushButton()
         self.__add_general_question.setText("Add general question")
 
-        layout_general.addWidget(self.__add_page_question)
-        layout_general.addWidget(self.__add_general_question)
-
-        return layout_general
+        layout.addWidget(self.__add_page_question)
+        layout.addWidget(self.__add_general_question)
 
     def __set_bottom_widget(self) -> QWidget:
         # bottom
