@@ -4,6 +4,7 @@ from io import TextIOWrapper
 from pdf_visualization.card import Card
 from application_constants import TYPE_QUEST_PAGE_SPECIFIC_CONSTANT
 from application_constants import ONGOING_TEST_FLAG_YES
+from application_constants import NO_ANSWER_FLAG
 
 
 class Question(Card):
@@ -117,6 +118,7 @@ class Question(Card):
     def __manage_question_field(
         num_col: int, string: str, question: "Question", ongoing_test: bool
     ) -> None:
+        string = string.strip()
         match num_col:
             case 0:
                 # Page number
@@ -128,11 +130,14 @@ class Question(Card):
 
             case 2:
                 # Answer
-                question.set_answer(string)
+                if string == NO_ANSWER_FLAG:
+                    question.set_answer("")
+                else:
+                    question.set_answer(string)
 
             case 3:
                 # Type
-                type_quest_str: str = string.strip()
+                type_quest_str: str = string
                 if type_quest_str == TYPE_QUEST_PAGE_SPECIFIC_CONSTANT:
                     question.set_question_type(Question.QuestionType.PAGE_SPECIFIC)
                 else:
@@ -142,7 +147,7 @@ class Question(Card):
                 # Past results
                 char: str
                 results: list[Question.Result] = []
-                for char in string.strip():
+                for char in string:
                     if char == "1":
                         results.append(Question.Result.TRUE)
                     elif char == "0":
@@ -155,8 +160,8 @@ class Question(Card):
             case 5:
                 # current result
                 current_result: Question.Result = Question.Result.NOT_DONE
-                if string.strip() != "" and ongoing_test:
-                    match int(string.strip()):
+                if string != "" and ongoing_test:
+                    match int(string):
                         case Question.Result.ERROR.value:
                             current_result = Question.Result.ERROR
                         case Question.Result.NOT_DONE.value:
