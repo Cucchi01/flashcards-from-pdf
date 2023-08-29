@@ -42,7 +42,7 @@ class PDFWindowVisualizationControl:
     def __set_controls_page_position_layout(self) -> None:
         # TODO: manage back_page and next_page
         self.__pdf_window_layout.get_pdf_page_num_spinbox().valueChanged.connect(
-            self.__pdf_window_model.update_page
+            self.__pdf_window_model.update_page_spinbox_change
         )
         # self.back_page_button.clicked.connect(self.__previous_card)
         # self.next_page_button.clicked.connect(self.__previous_card)

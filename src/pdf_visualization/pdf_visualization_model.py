@@ -28,7 +28,7 @@ class PDFWindowVisualizationModel:
         self.__io_flashcards_info: PDFTestsInfo = IOFlashcards.get_past_tests_info(
             path_of_flashcards
         )
-        self.__flashcards: dict[
+        self.__flashcards_from_pdf_page: dict[
             int, list[Flashcard]
         ] = IOFlashcards.get_flashcards_from_pdf(path_of_flashcards)
 
@@ -44,10 +44,9 @@ class PDFWindowVisualizationModel:
             self.__cards_to_display,
             self.__num_pdf_page_to_card_index,
             self.__num_flashcard_to_card_index,
-        ) = merge_cards(self.__flashcards, self.__num_pdf_pages)
+        ) = merge_cards(self.__flashcards_from_pdf_page, self.__num_pdf_pages)
 
         self.__current_card_index: int = 0
-        self.__current_pdf_page: int = 0
         self.__num_cards: int = len(self.__cards_to_display)
         self.__is_page_spinbox_event_disabled: bool = False
         self.__is_back_button_disabled: bool = True
@@ -64,22 +63,23 @@ class PDFWindowVisualizationModel:
         self.__setup_bottom_widget()
 
     def __set_page_position(self) -> None:
-        self.__current_pdf_page = self.__cards_to_display[
-            self.__current_card_index
-        ].get_pdf_page()
-        self.__window_layout.set_num_page(self.__current_pdf_page)
+        current_pdf_page_index = self.get_current_page_index()
+        self.__window_layout.set_num_page(current_pdf_page_index)
         self.__is_page_spinbox_event_disabled = False
 
-    def update_page(self) -> None:
+    def get_current_page_index(self) -> int:
+        return self.__cards_to_display[self.__current_card_index].get_pdf_page()
+
+    def update_page_spinbox_change(self) -> None:
         if not self.__is_page_spinbox_event_disabled:
-            self.__current_pdf_page = (
-                self.__window_layout.get_pdf_page_num_spinbox().value()
-            )
-            new_page_num: int = self.__current_pdf_page - 1
+            new_page_num: int = self.__get_pdf_page_from_spinbox()
             if new_page_num < 0 or new_page_num >= self.__num_pdf_pages:
                 raise ValueError("Page value not valid")
 
             self.__change_card_index(self.__num_pdf_page_to_card_index[new_page_num])
+
+    def __get_pdf_page_from_spinbox(self) -> int:
+        return self.__window_layout.get_pdf_page_num_spinbox().value() - 1
 
     def __setup_left_panel(self) -> None:
         # TODO: add the management of the flashcards
@@ -193,29 +193,56 @@ class PDFWindowVisualizationModel:
             flashcard.set_reference_page(Flashcard.GENERIC_PAGE)
             flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
 
-        # self.__get_index_list_position()
+        index_in_list: int = self.__get_index_list_position()
 
-        self.__add_flashcard(flashcard)
-        self.add_flashcard_to_file()
+        self.__add_flashcard_at_index(flashcard, index_in_list)
+        self.save_flashcard_to_file()
         self.clear_input_fields()
 
-    # def __get_index_list_position(self) -> int:
-    #     current_card: Card = self.__cards_to_display[self.__current_card_index]
-    #     flashcards_current_page: list[Flashcard] = self.__flashcards[current_card.get_reference_page()]
-    #     current_flashcard: Flashcard
-    #     if isinstance(current_card, Flashcard):
-    #         current_flashcard = current_card
-    #     else:
-    #         if current_card.get_pdf_page()
-    #         return len(self.__flashcards[])
+    def __get_index_list_position(self) -> int:
+        current_card: Card = self.__cards_to_display[self.__current_card_index]
+        flashcards_current_page: Optional[
+            list[Flashcard]
+        ] = self.__flashcards_from_pdf_page.get(current_card.get_pdf_page())
+        current_flashcard: Flashcard
+        if isinstance(current_card, Flashcard):
+            current_flashcard = current_card
+        else:
+            if flashcards_current_page is None:
+                return 0
+            return len(flashcards_current_page)
 
-    #     while
+        if flashcards_current_page is None:
+            raise ValueError("Not expected value")
+        i: int = 0
+        while flashcards_current_page[i] != current_flashcard:
+            i += 1
+            if i >= len(flashcards_current_page):
+                raise ValueError("Not expected value")
+
+        return i
 
     def __add_flashcard(self, flashcard: Flashcard):
-        if flashcard.get_reference_page() in self.__flashcards.keys():
-            self.__flashcards[flashcard.get_reference_page()].append(flashcard)
+        if flashcard.get_reference_page() in self.__flashcards_from_pdf_page.keys():
+            self.__flashcards_from_pdf_page[flashcard.get_reference_page()].append(
+                flashcard
+            )
         else:
-            self.__flashcards[flashcard.get_reference_page()] = [flashcard]
+            self.__flashcards_from_pdf_page[flashcard.get_reference_page()] = [
+                flashcard
+            ]
+
+        self.__num_cards += 1
+
+    def __add_flashcard_at_index(self, flashcard: Flashcard, index_in_list):
+        if flashcard.get_reference_page() in self.__flashcards_from_pdf_page.keys():
+            self.__flashcards_from_pdf_page[flashcard.get_reference_page()].insert(
+                index_in_list, flashcard
+            )
+        else:
+            self.__flashcards_from_pdf_page[flashcard.get_reference_page()] = [
+                flashcard
+            ]
 
         self.__num_cards += 1
 
@@ -224,6 +251,9 @@ class PDFWindowVisualizationModel:
 
     def get_new_flashcard(self) -> Optional[Flashcard]:
         flashcard: Flashcard = Flashcard()
+
+        flashcard.set_reference_page(self.get_current_page_index())
+
         question_text: str = (
             self.__window_layout.get_input_text_question().toPlainText().strip()
         )
@@ -250,9 +280,6 @@ class PDFWindowVisualizationModel:
         else:
             flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
 
-        flashcard.set_reference_page(
-            self.__window_layout.get_pdf_page_num_spinbox().value()
-        )
         return flashcard
 
     def clear_input_fields(self) -> None:
@@ -260,12 +287,12 @@ class PDFWindowVisualizationModel:
         self.__window_layout.get_input_text_answer().setPlainText("")
         self.__window_layout.get_page_specific_checkbox().setChecked(True)
 
-    def add_flashcard_to_file(self) -> None:
+    def save_flashcard_to_file(self) -> None:
         IOFlashcards.save_flashcards_file(
             self.__path_of_pdf,
             self.__io_flashcards_info,
             self.get_num_flashcards(),
-            self.__flashcards,
+            self.__flashcards_from_pdf_page,
         )
 
 

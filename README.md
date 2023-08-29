@@ -6,6 +6,7 @@ There is a row that is at 1 if there is an ongoing test and at 0 otherwise.\\
 Then there is a number that corresponds to the number of questions and finally there are questions. They are ordered by num_page.\\
 A generic question is a questions that is not connected to a page and the reference page gives only the position of the question. A generic question could have an answer or not. For example a flashcard could only be put there to say something to the reader.\\
 The questions that are generic to the deck and do not have a corresponding pdf page are stored with a negative num_page.\\
+The question, that are not generic, are inserted before the card that is currently visualized. So, if there is a flashcard on a specific pdf page on the screen, the reference page of the new flashcard will be the same and it will be inserted immediatly before.  
 A question can be specific to a page and have an answer, for example to specify further something.\\
 The last but one field contains n digits that are the outcome of the previous response sessions. 1 means that the question was known and 0 represents the opposite. For example, 100 means that the first time the response was correct and that the last two times the responses were not remembered.\\
 Finally there is the result of the ongoing test. If there is no ongoing test this field should be not considered.\\
