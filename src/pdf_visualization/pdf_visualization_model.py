@@ -111,6 +111,20 @@ class PDFWindowVisualizationModel:
         if self.__current_card_index >= self.__num_cards - 1:
             return None
 
+        # if it is a question the next step is the answer, if present
+        card: Card = self.__cards_to_display[self.__current_card_index]
+        if isinstance(self.__cards_to_display[self.__current_card_index], Flashcard):
+            flashcard: Flashcard = card
+            if (
+                self.__window_layout.get_question_label().text()
+                != flashcard.get_answer()
+                and flashcard.get_answer() != ""
+            ):
+                self.__window_layout.get_question_label().setText(
+                    flashcard.get_answer()
+                )
+                return
+
         self.__change_card_index(self.__current_card_index + 1)
 
     def __change_card_index(self, new_index) -> None:
