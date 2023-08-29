@@ -200,10 +200,10 @@ class PDFWindowVisualizationModel:
         self.clear_input_fields()
 
     def __add_flashcard(self, flashcard: Flashcard):
-        if flashcard.get_pdf_page() in self.__flashcards.keys():
-            self.__flashcards[flashcard.get_pdf_page()].append(flashcard)
+        if flashcard.get_reference_page() in self.__flashcards.keys():
+            self.__flashcards[flashcard.get_reference_page()].append(flashcard)
         else:
-            self.__flashcards[flashcard.get_pdf_page()] = [flashcard]
+            self.__flashcards[flashcard.get_reference_page()] = [flashcard]
 
         self.__num_cards += 1
 

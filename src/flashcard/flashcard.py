@@ -62,10 +62,12 @@ class Flashcard(Card):
         self.__current_result: Flashcard.Result = current_result
 
     def get_reference_page(self) -> int:
+        # reference_page are 1-based
         return self.__reference_page
 
     def get_pdf_page(self) -> int:
-        return self.get_reference_page()
+        # pdf_page are 0-based
+        return self.get_reference_page() - 1
 
     def get_question(self) -> str:
         return self.__question
