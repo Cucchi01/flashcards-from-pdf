@@ -26,6 +26,7 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__num_page: int = 1
 
         # header
+        self.__shuffle_button: QPushButton
         self.__pdf_page_num_spinbox: QSpinBox
         self.__back_page_button: QPushButton
         self.__next_page_button: QPushButton
@@ -43,8 +44,8 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__question_input: QPlainTextEdit
         self.__answer_input: QPlainTextEdit
         self.__page_specific_checkbox: QCheckBox
-        self.__add_page_flashcard_btn: QPushButton
-        self.__add_generic_flashcard_btn: QPushButton
+        self.__add_page_flashcard_button: QPushButton
+        self.__add_generic_flashcard_button: QPushButton
 
         # bottom
         self.__back_flashcard_button: QPushButton
@@ -82,10 +83,19 @@ class PDFWindowVisualizationLayout(QWidget):
         # header
         title = QWidget(self)
         layout = QVBoxLayout()
+
+        layout_title = QHBoxLayout()
         label = QLabel(self.__filename, title)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setFont(QFont("Calisto MT", 17))
-        layout.addWidget(label)
+
+        self.__shuffle_button = QPushButton()
+        self.__shuffle_button.setText("Shuffle")
+
+        layout_title.addWidget(self.__shuffle_button, stretch=1)
+        layout_title.addWidget(label, stretch=4)
+
+        layout.addLayout(layout_title)
         layout.addLayout(self.__set_page_position_layout())
         title.setLayout(layout)
         return title
@@ -174,13 +184,13 @@ class PDFWindowVisualizationLayout(QWidget):
         return bottom
 
     def __add_flashcard_buttons(self, layout: QVBoxLayout) -> None:
-        self.__add_page_flashcard_btn = QPushButton()
-        self.__add_page_flashcard_btn.setText("Add flashcard")
-        self.__add_generic_flashcard_btn = QPushButton()
-        self.__add_generic_flashcard_btn.setText("Add generic flashcard")
+        self.__add_page_flashcard_button = QPushButton()
+        self.__add_page_flashcard_button.setText("Add flashcard")
+        self.__add_generic_flashcard_button = QPushButton()
+        self.__add_generic_flashcard_button.setText("Add generic flashcard")
 
-        layout.addWidget(self.__add_page_flashcard_btn)
-        layout.addWidget(self.__add_generic_flashcard_btn)
+        layout.addWidget(self.__add_page_flashcard_button)
+        layout.addWidget(self.__add_generic_flashcard_button)
 
     def __set_bottom_widget(self) -> QWidget:
         # bottom
@@ -271,6 +281,9 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__num_page = new_num_page
         self.__pdf_page_num_spinbox.setValue(self.__num_page)
 
+    def get_shuffle_button(self) -> QPushButton:
+        return self.__shuffle_button
+
     def get_pdf_page_num_spinbox(self) -> QSpinBox:
         return self.__pdf_page_num_spinbox
 
@@ -286,10 +299,10 @@ class PDFWindowVisualizationLayout(QWidget):
     def get_pdf_nav(self) -> QtPdf.QPdfPageNavigator:
         return self.__pdf_nav
 
-    def get_next_card_btn(self) -> QPushButton:
+    def get_next_card_button(self) -> QPushButton:
         return self.__next_card_button
 
-    def get_back_card_btn(self) -> QPushButton:
+    def get_back_card_button(self) -> QPushButton:
         return self.__back_card_button
 
     def get_input_text_question(self) -> QPlainTextEdit:
@@ -301,8 +314,8 @@ class PDFWindowVisualizationLayout(QWidget):
     def get_page_specific_checkbox(self) -> QCheckBox:
         return self.__page_specific_checkbox
 
-    def get_page_flashcard_btn(self) -> QPushButton:
-        return self.__add_page_flashcard_btn
+    def get_page_flashcard_button(self) -> QPushButton:
+        return self.__add_page_flashcard_button
 
-    def get_generic_flashcard_btn(self) -> QPushButton:
-        return self.__add_generic_flashcard_btn
+    def get_generic_flashcard_button(self) -> QPushButton:
+        return self.__add_generic_flashcard_button

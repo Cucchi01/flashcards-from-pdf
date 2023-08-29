@@ -70,6 +70,9 @@ class PDFWindowVisualizationModel:
     def get_current_page_index(self) -> int:
         return self.__cards_to_display[self.__current_card_index].get_pdf_page()
 
+    def shuffle_cards(self) -> None:
+        pass
+
     def update_page_spinbox_change(self) -> None:
         if not self.__is_page_spinbox_event_disabled:
             new_page_num: int = self.__get_pdf_page_from_spinbox()
@@ -94,7 +97,7 @@ class PDFWindowVisualizationModel:
 
     def __setup_current_card_bottom_layout(self) -> None:
         if self.__num_cards == 1:
-            self.__window_layout.get_next_card_btn().setDisabled(True)
+            self.__window_layout.get_next_card_button().setDisabled(True)
             self.__is_next_button_disabled = True
 
     def previous_card(self) -> None:
@@ -109,7 +112,6 @@ class PDFWindowVisualizationModel:
             return None
 
         self.__change_card_index(self.__current_card_index + 1)
-        return None
 
     def __change_card_index(self, new_index) -> None:
         if new_index < 0 or new_index >= self.__num_cards:
@@ -121,8 +123,8 @@ class PDFWindowVisualizationModel:
         self.__update_card(None)
 
         self.__update_page_pos_layout()
-        self.__update_back_btn_state()
-        self.__update_next_btn_state()
+        self.__update_back_button_state()
+        self.__update_next_button_state()
 
         QApplication.restoreOverrideCursor()
 
@@ -135,26 +137,26 @@ class PDFWindowVisualizationModel:
         self.__window_layout.get_pdf_page_num_spinbox().setValue(page_index)
         self.__is_page_spinbox_event_disabled = False
 
-    def __update_back_btn_state(self) -> None:
+    def __update_back_button_state(self) -> None:
         if self.__current_card_index > 0 and self.__is_back_button_disabled:
-            self.__window_layout.get_back_card_btn().setDisabled(False)
+            self.__window_layout.get_back_card_button().setDisabled(False)
             self.__is_back_button_disabled = False
         elif self.__current_card_index == 0 and not self.__is_back_button_disabled:
-            self.__window_layout.get_back_card_btn().setDisabled(True)
+            self.__window_layout.get_back_card_button().setDisabled(True)
             self.__is_back_button_disabled = True
 
-    def __update_next_btn_state(self) -> None:
+    def __update_next_button_state(self) -> None:
         if (
             self.__current_card_index == self.__num_cards - 1
             and not self.__is_next_button_disabled
         ):
-            self.__window_layout.get_next_card_btn().setDisabled(True)
+            self.__window_layout.get_next_card_button().setDisabled(True)
             self.__is_next_button_disabled = True
         elif (
             self.__current_card_index < self.__num_cards - 1
             and self.__is_next_button_disabled
         ):
-            self.__window_layout.get_next_card_btn().setDisabled(False)
+            self.__window_layout.get_next_card_button().setDisabled(False)
             self.__is_next_button_disabled = False
 
     def __update_card(self, event) -> None:
@@ -246,7 +248,7 @@ class PDFWindowVisualizationModel:
 
         self.__num_cards += 1
 
-    def get_num_flashcards(self):
+    def get_num_flashcards(self) -> int:
         return self.__num_cards - self.__num_pdf_pages
 
     def get_new_flashcard(self) -> Optional[Flashcard]:
