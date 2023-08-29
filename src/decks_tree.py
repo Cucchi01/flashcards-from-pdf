@@ -111,7 +111,7 @@ class DecksStructure(QTreeWidget):
 
         update_button = QAction("Update PDF", self.menu_right_click)
         update_button.setStatusTip(
-            "Update the pdf and change accordingly the question positions"
+            "Update the pdf and change accordingly the flashcard positions"
         )
         update_button.triggered.connect(self.__update_pdf)
 

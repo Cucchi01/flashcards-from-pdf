@@ -1,4 +1,4 @@
-from pdf_visualization.card import Card
+from flashcard.card import Card
 
 
 class PdfPage(Card):

@@ -11,8 +11,8 @@ The last but one field contains n digits that are the outcome of the previous re
 Finally there is the result of the ongoing test. If there is no ongoing test this field should be not considered.\\
 
 num_completed_tests\\
-date1_completed ?^? percentage_correct_first_try\\
-date2_completed ?^? percentage_correct_first_try\\
+date1_completed ?^? percentage_correct_first_try ?^?\\
+date2_completed ?^? percentage_correct_first_try ?^?\\
 ....\\
 ongoing_test_flag['0'=no|'1'=yes]\\
 num_questions\\

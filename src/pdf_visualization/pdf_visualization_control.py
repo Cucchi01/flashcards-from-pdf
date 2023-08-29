@@ -5,6 +5,8 @@ from PyQt6.QtGui import (
     QKeySequence,
 )
 
+from functools import partial
+
 from pdf_visualization.pdf_visualization_model import PDFWindowVisualizationModel
 from pdf_visualization.pdf_visualization_layout import PDFWindowVisualizationLayout
 
@@ -46,7 +48,7 @@ class PDFWindowVisualizationControl:
         # self.next_page_button.clicked.connect(self.__previous_card)
 
     def __set_controls_left_panel_widget(self) -> None:
-        # TODO: add the management of the questions
+        # TODO: add the management of the flashcards
         self.shortcut_zoom_increase = QShortcut(
             QKeySequence("Ctrl++"), self.__pdf_window_layout
         )
@@ -61,29 +63,33 @@ class PDFWindowVisualizationControl:
         )
 
     def __set_controls_right_panel_widget(self) -> None:
-        self.__set_controls_add_question_button_layout()
+        self.__set_controls_add_flashcard_button_layout()
 
-    def __set_controls_add_question_button_layout(self) -> None:
-        # TODO: manage event for the question button
-        pass
+    def __set_controls_add_flashcard_button_layout(self) -> None:
+        self.__pdf_window_layout.get_page_flashcard_btn().clicked.connect(
+            partial(self.__pdf_window_model.add_page_flashcard, flag_generic=False)
+        )
+        self.__pdf_window_layout.get_generic_flashcard_btn().clicked.connect(
+            partial(self.__pdf_window_model.add_page_flashcard, flag_generic=True)
+        )
 
     def __set_controls_bottom_widget(self) -> None:
         # bottom
         self.__set_controls_current_card_bottom_layout()
-        self.__set_controls_current_question_bottom_layout()
+        self.__set_controls_current_flashcard_bottom_layout()
 
     def __set_controls_current_card_bottom_layout(self) -> None:
-        # TODO: handle previous and next question button
-        # self.back_question_button.clicked.connect(self.__method_name)
-        self.__pdf_window_layout.get_back_card_button().clicked.connect(
+        # TODO: handle previous and next flashcard button
+        # self.back_flashcard_button.clicked.connect(self.__method_name)
+        self.__pdf_window_layout.get_back_card_btn().clicked.connect(
             self.__pdf_window_model.previous_card
         )
-        self.__pdf_window_layout.get_next_card_button().clicked.connect(
+        self.__pdf_window_layout.get_next_card_btn().clicked.connect(
             self.__pdf_window_model.next_card
         )
-        # self.next_question_button.clicked.connect(self.__method_name)
+        # self.next_flashcard_button.clicked.connect(self.__method_name)
 
-    def __set_controls_current_question_bottom_layout(self) -> None:
+    def __set_controls_current_flashcard_bottom_layout(self) -> None:
         # TODO: manage correct and mistake answers
         # self.mistake_button.clicked.connect(self.__previous_card)
         # self.correct_button.clicked.connect(self.__next_card)

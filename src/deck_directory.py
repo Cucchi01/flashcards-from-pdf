@@ -19,13 +19,13 @@ class DirectoryEntry:
 
 
 class DirectoryEntryFile(DirectoryEntry):
-    def __init__(self, entry_name: str, questions_available: bool = False):
+    def __init__(self, entry_name: str, flashcards_available: bool = False):
         super().__init__(type=FILE, entry_name=entry_name)
-        self.questions_available = questions_available
+        self.flashcards_available = flashcards_available
 
-    def set_questions_available(self, status: bool):
-        """Sets the availability of the questions to a new status"""
-        self.questions_available = status
+    def set_flashcards_available(self, status: bool):
+        """Sets the availability of the flashcards to a new status"""
+        self.flashcards_available = status
 
 
 class DirectoryEntryFolder(DirectoryEntry):
@@ -104,7 +104,7 @@ def process_entry_file(
 ) -> None:
     """Process a file of a directory.
 
-    It adds the DirectoryEntryFile if the filename, excluding the extension, was not encountered before. If the corrisponding .txt file is met then questions_available of that entry is set to True.
+    It adds the DirectoryEntryFile if the filename, excluding the extension, was not encountered before. If the corrisponding .txt file is met then flashcards_available of that entry is set to True.
 
     Parameters
     ----------
@@ -128,18 +128,18 @@ def process_entry_file(
             if filename not in files_processed:
                 immediate_decks[filename] = DirectoryEntryFile(
                     entry_name=entry_name,
-                    questions_available=False,
+                    flashcards_available=False,
                 )
                 files_processed.add(filename)
         case ".txt":
             if filename not in files_processed:
                 immediate_decks[filename] = DirectoryEntryFile(
                     entry_name=entry_name,
-                    questions_available=True,
+                    flashcards_available=True,
                 )
                 files_processed.add(filename)
             else:
-                immediate_decks[filename].set_questions_available(status=True)
+                immediate_decks[filename].set_flashcards_available(status=True)
 
         case _:
             print("File {filename} not processed".format(filename=entry_name))

@@ -43,14 +43,14 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__question_input: QPlainTextEdit
         self.__answer_input: QPlainTextEdit
         self.__page_specific_checkbox: QCheckBox
-        self.__add_page_question: QPushButton
-        self.__add_general_question: QPushButton
+        self.__add_page_flashcard_btn: QPushButton
+        self.__add_generic_flashcard_btn: QPushButton
 
         # bottom
-        self.__back_question_button: QPushButton
+        self.__back_flashcard_button: QPushButton
         self.__back_card_button: QPushButton
         self.__next_card_button: QPushButton
-        self.__next_question_button: QPushButton
+        self.__next_flashcard_button: QPushButton
         self.__is_back_card_button_disabled: bool = True
         self.__is_next_card_button_disabled: bool = False
         self.__mistake_button: QPushButton
@@ -91,7 +91,7 @@ class PDFWindowVisualizationLayout(QWidget):
         return title
 
     def __set_page_position_layout(self) -> QHBoxLayout:
-        # TODO: add a spinbox for the question number and for the card number. Not only the pdf number
+        # TODO: add a spinbox for the flashcard number and for the card number. Not only the pdf number
 
         page_pos_layout = QWidget(self)
         layout = QHBoxLayout()
@@ -123,7 +123,7 @@ class PDFWindowVisualizationLayout(QWidget):
         return layout
 
     def __set_left_panel_widget(self) -> QWidget:
-        # visualization of the various pages or the questions before them, one at the time
+        # visualization of the various pages or the flashcards before them, one at the time
         main = QWidget(self)
 
         self.__left_panel_layout = QVBoxLayout()
@@ -168,19 +168,19 @@ class PDFWindowVisualizationLayout(QWidget):
         layout.addWidget(answer_label)
         layout.addWidget(self.__answer_input)
         layout.addWidget(self.__page_specific_checkbox)
-        self.__add_question_buttons(layout)
+        self.__add_flashcard_buttons(layout)
 
         bottom.setLayout(layout)
         return bottom
 
-    def __add_question_buttons(self, layout: QVBoxLayout) -> None:
-        self.__add_page_question = QPushButton()
-        self.__add_page_question.setText("Add question")
-        self.__add_general_question = QPushButton()
-        self.__add_general_question.setText("Add general question")
+    def __add_flashcard_buttons(self, layout: QVBoxLayout) -> None:
+        self.__add_page_flashcard_btn = QPushButton()
+        self.__add_page_flashcard_btn.setText("Add flashcard")
+        self.__add_generic_flashcard_btn = QPushButton()
+        self.__add_generic_flashcard_btn.setText("Add generic flashcard")
 
-        layout.addWidget(self.__add_page_question)
-        layout.addWidget(self.__add_general_question)
+        layout.addWidget(self.__add_page_flashcard_btn)
+        layout.addWidget(self.__add_generic_flashcard_btn)
 
     def __set_bottom_widget(self) -> QWidget:
         # bottom
@@ -188,14 +188,14 @@ class PDFWindowVisualizationLayout(QWidget):
         layout = QVBoxLayout()
 
         layout_current_card = self.__set_current_card_bottom_layout()
-        layout_current_question_correctness = (
-            self.__set_current_question_bottom_layout()
+        layout_current_flashcard_correctness = (
+            self.__set_current_flashcard_bottom_layout()
         )
 
         # layout_general = self.__set_general_bottom_layout()
 
         layout.addLayout(layout_current_card)
-        layout.addLayout(layout_current_question_correctness)
+        layout.addLayout(layout_current_flashcard_correctness)
         # layout.addLayout(layout_general)
 
         bottom.setLayout(layout)
@@ -207,11 +207,11 @@ class PDFWindowVisualizationLayout(QWidget):
         bold_font = QFont()
         bold_font.setBold(True)
 
-        # TODO: handle previous and next question button
-        self.__back_question_button = QPushButton()
-        self.__back_question_button.setText("|< Previous question")
-        self.__back_question_button.setFont(bold_font)
-        self.__back_question_button.setDisabled(True)
+        # TODO: handle previous and next flashcard button
+        self.__back_flashcard_button = QPushButton()
+        self.__back_flashcard_button.setText("|< Previous flashcard")
+        self.__back_flashcard_button.setFont(bold_font)
+        self.__back_flashcard_button.setDisabled(True)
 
         self.__back_card_button = QPushButton()
         self.__back_card_button.setText("<< Back")
@@ -220,19 +220,19 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__next_card_button = QPushButton()
         self.__next_card_button.setText("Next >>")
 
-        self.__next_question_button = QPushButton()
-        self.__next_question_button.setText("Next question >|")
-        self.__next_question_button.setFont(bold_font)
-        self.__next_question_button.setDisabled(True)
+        self.__next_flashcard_button = QPushButton()
+        self.__next_flashcard_button.setText("Next flashcard >|")
+        self.__next_flashcard_button.setFont(bold_font)
+        self.__next_flashcard_button.setDisabled(True)
 
-        layout_current_card.addWidget(self.__back_question_button)
+        layout_current_card.addWidget(self.__back_flashcard_button)
         layout_current_card.addWidget(self.__back_card_button)
         layout_current_card.addWidget(self.__next_card_button)
-        layout_current_card.addWidget(self.__next_question_button)
+        layout_current_card.addWidget(self.__next_flashcard_button)
 
         return layout_current_card
 
-    def __set_current_question_bottom_layout(self) -> QHBoxLayout:
+    def __set_current_flashcard_bottom_layout(self) -> QHBoxLayout:
         # TODO: manage correct and mistake answers
         layout_current_card = QHBoxLayout()
 
@@ -286,8 +286,23 @@ class PDFWindowVisualizationLayout(QWidget):
     def get_pdf_nav(self) -> QtPdf.QPdfPageNavigator:
         return self.__pdf_nav
 
-    def get_next_card_button(self) -> QPushButton:
+    def get_next_card_btn(self) -> QPushButton:
         return self.__next_card_button
 
-    def get_back_card_button(self) -> QPushButton:
+    def get_back_card_btn(self) -> QPushButton:
         return self.__back_card_button
+
+    def get_input_text_question(self) -> QPlainTextEdit:
+        return self.__question_input
+
+    def get_input_text_answer(self) -> QPlainTextEdit:
+        return self.__answer_input
+
+    def get_page_specific_checkbox(self) -> QCheckBox:
+        return self.__page_specific_checkbox
+
+    def get_page_flashcard_btn(self) -> QPushButton:
+        return self.__add_page_flashcard_btn
+
+    def get_generic_flashcard_btn(self) -> QPushButton:
+        return self.__add_generic_flashcard_btn
