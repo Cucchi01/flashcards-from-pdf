@@ -17,3 +17,6 @@ date2_completed ?^? percentage_correct_first_try ?^?\\
 ongoing_test_flag['0'=no|'1'=yes]\\
 num_questions\\
 num_page ?^? questions ?^? answer['!-!'= no answer] ?^? type['g'=general|'p'=page_specific] ?^? 100 ?^? ongoing_test_result['0'=mistake|'1'=not_done|'2'=correct][optional]?^?\\
+
+The reference page index is in 1-based format, because in this way a user can read a txt file and make sense if it. Sometimes this software is not available, but it can read the txt file. In the codebase the index of a pdf page is saved and used in 0-based format.
+There is always a +1 in the visualizazion process. So in the txt a generic page has as index -1 and internally it is store -2.

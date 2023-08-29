@@ -4,7 +4,6 @@ from flashcard.card import Card
 class PdfPage(Card):
     def __init__(
         self,
-        # the number of the page in a pdf is 0-based
         num_page: int = 0,
     ) -> None:
         super().__init__()

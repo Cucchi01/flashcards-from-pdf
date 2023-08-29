@@ -64,7 +64,6 @@ class PDFWindowVisualizationModel:
         self.__setup_bottom_widget()
 
     def __set_page_position(self) -> None:
-        # the num_page stored is 0-based, but the visualization is 1-based numbering
         self.__current_pdf_page = self.__cards_to_display[
             self.__current_card_index
         ].get_pdf_page()
@@ -128,10 +127,9 @@ class PDFWindowVisualizationModel:
         QApplication.restoreOverrideCursor()
 
     def __update_page_pos_layout(self) -> None:
-        # the pages are 0-based, but the visualization is 1-based
-        page_index: int = (
-            self.__cards_to_display[self.__current_card_index].get_pdf_page() + 1
-        )
+        page_index: int = self.__cards_to_display[
+            self.__current_card_index
+        ].get_pdf_page_for_visualization()
 
         self.__is_page_spinbox_event_disabled = True
         self.__window_layout.get_pdf_page_num_spinbox().setValue(page_index)
@@ -192,12 +190,26 @@ class PDFWindowVisualizationModel:
         flashcard: Flashcard = app
 
         if flag_generic:
-            flashcard.set_reference_page(Flashcard.NO_REFERENCE_PAGE)
+            flashcard.set_reference_page(Flashcard.GENERIC_PAGE)
             flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
+
+        # self.__get_index_list_position()
 
         self.__add_flashcard(flashcard)
         self.add_flashcard_to_file()
         self.clear_input_fields()
+
+    # def __get_index_list_position(self) -> int:
+    #     current_card: Card = self.__cards_to_display[self.__current_card_index]
+    #     flashcards_current_page: list[Flashcard] = self.__flashcards[current_card.get_reference_page()]
+    #     current_flashcard: Flashcard
+    #     if isinstance(current_card, Flashcard):
+    #         current_flashcard = current_card
+    #     else:
+    #         if current_card.get_pdf_page()
+    #         return len(self.__flashcards[])
+
+    #     while
 
     def __add_flashcard(self, flashcard: Flashcard):
         if flashcard.get_reference_page() in self.__flashcards.keys():
@@ -304,9 +316,7 @@ def merge_cards(
             num_flashcard_to_card_index.append(len(merged_cards))
             index_quest_to_add += 1
         elif (
-            flashcards[index_quest_to_add].get_reference_page()
-            - 1  # reference page start from 1 and not 0
-            <= index_pdf_page_to_add
+            flashcards[index_quest_to_add].get_reference_page() <= index_pdf_page_to_add
         ):
             card = flashcards[index_quest_to_add]
             num_flashcard_to_card_index.append(len(merged_cards))

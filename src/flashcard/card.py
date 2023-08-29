@@ -8,3 +8,6 @@ class Card(ABC):
     @abstractmethod
     def get_pdf_page(self) -> int:
         pass
+
+    def get_pdf_page_for_visualization(self) -> int:
+        return self.get_pdf_page() + 1

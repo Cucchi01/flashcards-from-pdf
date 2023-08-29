@@ -56,7 +56,7 @@ class IOFlashcards:
                     )
 
                 # Adding flashcard
-                num_page: int = quest.get_reference_page()
+                num_page: int = quest.get_pdf_page()
                 if num_page in pages_with_flashcards:
                     flashcards[num_page].append(quest)
                 else:
@@ -79,7 +79,7 @@ class IOFlashcards:
         match num_col:
             case 0:
                 # Page number
-                flashcard.set_reference_page(int(string))
+                flashcard.set_reference_page_from_visualization(int(string))
 
             case 1:
                 # flashcard

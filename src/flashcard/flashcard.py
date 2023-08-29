@@ -6,7 +6,7 @@ from application_constants import FILE_FLASHCARDS_SEPARATOR
 
 
 class Flashcard(Card):
-    NO_REFERENCE_PAGE: int = -1
+    GENERIC_PAGE: int = -2
 
     class QuestionType(Enum):
         GENERIC = 1
@@ -58,16 +58,17 @@ class Flashcard(Card):
     def set_reference_page(self, reference_page: int = 0) -> None:
         self.__reference_page: int = reference_page
 
+    def set_reference_page_from_visualization(self, reference_page: int = 0) -> None:
+        self.__reference_page = reference_page - 1
+
     def set_current_result(self, current_result: Result = Result.NOT_DONE) -> None:
         self.__current_result: Flashcard.Result = current_result
 
     def get_reference_page(self) -> int:
-        # reference_page are 1-based
         return self.__reference_page
 
     def get_pdf_page(self) -> int:
-        # pdf_page are 0-based
-        return self.get_reference_page() - 1
+        return self.get_reference_page()
 
     def get_question(self) -> str:
         return self.__question
@@ -99,7 +100,7 @@ class Flashcard(Card):
 
         return FILE_FLASHCARDS_SEPARATOR.join(
             [
-                str(self.get_reference_page()),
+                str(self.get_pdf_page_for_visualization()),
                 self.get_question(),
                 answer,
                 self.get_question_type().to_string(),
