@@ -48,7 +48,7 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__add_generic_flashcard_button: QPushButton
 
         # bottom
-        self.__back_flashcard_button: QPushButton
+        self.__previous_flashcard_button: QPushButton
         self.__back_card_button: QPushButton
         self.__next_card_button: QPushButton
         self.__next_flashcard_button: QPushButton
@@ -217,11 +217,10 @@ class PDFWindowVisualizationLayout(QWidget):
         bold_font = QFont()
         bold_font.setBold(True)
 
-        # TODO: handle previous and next flashcard button
-        self.__back_flashcard_button = QPushButton()
-        self.__back_flashcard_button.setText("|< Previous flashcard")
-        self.__back_flashcard_button.setFont(bold_font)
-        self.__back_flashcard_button.setDisabled(True)
+        self.__previous_flashcard_button = QPushButton()
+        self.__previous_flashcard_button.setText("|< Previous flashcard")
+        self.__previous_flashcard_button.setFont(bold_font)
+        self.__previous_flashcard_button.setDisabled(True)
 
         self.__back_card_button = QPushButton()
         self.__back_card_button.setText("<< Back")
@@ -233,9 +232,8 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__next_flashcard_button = QPushButton()
         self.__next_flashcard_button.setText("Next flashcard >|")
         self.__next_flashcard_button.setFont(bold_font)
-        self.__next_flashcard_button.setDisabled(True)
 
-        layout_current_card.addWidget(self.__back_flashcard_button)
+        layout_current_card.addWidget(self.__previous_flashcard_button)
         layout_current_card.addWidget(self.__back_card_button)
         layout_current_card.addWidget(self.__next_card_button)
         layout_current_card.addWidget(self.__next_flashcard_button)
@@ -299,11 +297,17 @@ class PDFWindowVisualizationLayout(QWidget):
     def get_pdf_nav(self) -> QtPdf.QPdfPageNavigator:
         return self.__pdf_nav
 
-    def get_next_card_button(self) -> QPushButton:
-        return self.__next_card_button
+    def get_previous_flashcard_button(self) -> QPushButton:
+        return self.__previous_flashcard_button
 
     def get_back_card_button(self) -> QPushButton:
         return self.__back_card_button
+
+    def get_next_card_button(self) -> QPushButton:
+        return self.__next_card_button
+
+    def get_next_flashcard_button(self) -> QPushButton:
+        return self.__next_flashcard_button
 
     def get_input_text_question(self) -> QPlainTextEdit:
         return self.__question_input

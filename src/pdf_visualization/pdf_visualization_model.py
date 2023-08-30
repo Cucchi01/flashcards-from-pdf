@@ -23,7 +23,7 @@ class PDFWindowVisualizationModel:
 
         if not is_flashcards_file_present:
             with open(path_of_flashcards, "w") as file:
-                file.write("0\n")
+                file.write("0\n0\n0\n")
 
         self.__io_flashcards_info: PDFTestsInfo = IOFlashcards.get_past_tests_info(
             path_of_flashcards
@@ -37,20 +37,38 @@ class PDFWindowVisualizationModel:
         self.__num_pdf_pages: int = IOFlashcards.get_pdf_page_count(self.__path_of_pdf)
         self.__point: QPointF = QPointF(0, 0)
 
+        # variables used to show the cards. When the shuffle button is pressed these are modified, on the other hand the ordered version is kept as is
         self.__cards_to_display: list[Card]
         self.__num_pdf_page_to_card_index: list[int]
         self.__num_flashcard_to_card_index: list[int]
-        (
-            self.__cards_to_display,
-            self.__num_pdf_page_to_card_index,
-            self.__num_flashcard_to_card_index,
-        ) = merge_cards(self.__flashcards_from_pdf_page, self.__num_pdf_pages)
+        self.__num_card_index_to_flashcard_index: dict[int, int]
 
+        self.__cards_to_display_ordered: list[Card]
+        self.__num_pdf_page_to_card_index_ordered: list[int]
+        self.__num_flashcard_to_card_index_ordered: list[int]
+        self.__num_card_index_to_flashcard_index_ordered: dict[int, int]
+        (
+            self.__cards_to_display_ordered,
+            self.__num_pdf_page_to_card_index_ordered,
+            self.__num_flashcard_to_card_index_ordered,
+            self.__num_card_index_to_flashcard_index,
+        ) = merge_cards_ordered(self.__flashcards_from_pdf_page, self.__num_pdf_pages)
+
+        self.__cards_to_display = self.__cards_to_display_ordered
+        self.__num_pdf_page_to_card_index = self.__num_pdf_page_to_card_index_ordered
+        self.__num_flashcard_to_card_index = self.__num_flashcard_to_card_index_ordered
+        self.__num_card_index_to_flashcard_index = (
+            self.__num_card_index_to_flashcard_index
+        )
+
+        self.__current_flashcard_index: int = 0
         self.__current_card_index: int = 0
         self.__num_cards: int = len(self.__cards_to_display)
         self.__is_page_spinbox_event_disabled: bool = False
-        self.__is_back_button_disabled: bool = True
-        self.__is_next_button_disabled: bool = False
+        self.__is_previous_flashcard_button_disabled: bool = True
+        self.__is_previous_card_button_disabled: bool = True
+        self.__is_next_card_button_disabled: bool = False
+        self.__is_next_flashcard_button_disabled: bool = True
 
         self.__window_layout: PDFWindowVisualizationLayout = (
             PDFWindowVisualizationLayout(self.__filename, self.__num_pdf_pages)
@@ -98,7 +116,7 @@ class PDFWindowVisualizationModel:
     def __setup_current_card_bottom_layout(self) -> None:
         if self.__num_cards == 1:
             self.__window_layout.get_next_card_button().setDisabled(True)
-            self.__is_next_button_disabled = True
+            self.__is_next_card_button_disabled = True
 
     def previous_card(self) -> None:
         if self.__current_card_index <= 0:
@@ -127,6 +145,22 @@ class PDFWindowVisualizationModel:
 
         self.__change_card_index(self.__current_card_index + 1)
 
+    def previous_flashcard(self) -> None:
+        new_card_index: int
+        if self.__current_flashcard_index > 0:
+            new_card_index = self.__num_flashcard_to_card_index[
+                self.__current_flashcard_index - 1
+            ]
+            self.__change_card_index(new_card_index)
+
+    def next_flashcard(self) -> None:
+        new_card_index: int
+        if self.__current_flashcard_index + 1 < self.get_num_flashcards():
+            new_card_index = self.__num_flashcard_to_card_index[
+                self.__current_flashcard_index + 1
+            ]
+            self.__change_card_index(new_card_index)
+
     def __change_card_index(self, new_index) -> None:
         if new_index < 0 or new_index >= self.__num_cards:
             print("Error: card index out of range")
@@ -134,11 +168,17 @@ class PDFWindowVisualizationModel:
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.__current_card_index = new_index
+        if isinstance(self.__cards_to_display[self.__current_card_index], Flashcard):
+            self.__current_flashcard_index = self.__num_card_index_to_flashcard_index[
+                self.__current_card_index
+            ]
+            self.__update_previous_flashcard_button_state()
+            self.__update_next_flashcard_button_state()
         self.__update_card(None)
 
         self.__update_page_pos_layout()
-        self.__update_back_button_state()
-        self.__update_next_button_state()
+        self.__update_previous_card_button_state()
+        self.__update_next_card_button_state()
 
         QApplication.restoreOverrideCursor()
 
@@ -151,27 +191,58 @@ class PDFWindowVisualizationModel:
         self.__window_layout.get_pdf_page_num_spinbox().setValue(page_index)
         self.__is_page_spinbox_event_disabled = False
 
-    def __update_back_button_state(self) -> None:
-        if self.__current_card_index > 0 and self.__is_back_button_disabled:
-            self.__window_layout.get_back_card_button().setDisabled(False)
-            self.__is_back_button_disabled = False
-        elif self.__current_card_index == 0 and not self.__is_back_button_disabled:
-            self.__window_layout.get_back_card_button().setDisabled(True)
-            self.__is_back_button_disabled = True
+    def __update_previous_flashcard_button_state(self) -> None:
+        if (
+            self.__current_flashcard_index > 0
+            and self.__is_previous_flashcard_button_disabled
+        ):
+            self.__window_layout.get_previous_flashcard_button().setDisabled(False)
+            self.__is_previous_flashcard_button_disabled = False
+        elif (
+            self.__current_flashcard_index == 0
+            and not self.__is_previous_flashcard_button_disabled
+        ):
+            self.__window_layout.get_previous_flashcard_button().setDisabled(True)
+            self.__is_previous_flashcard_button_disabled = True
 
-    def __update_next_button_state(self) -> None:
+    def __update_next_flashcard_button_state(self) -> None:
+        if (
+            self.__current_flashcard_index == self.get_num_flashcards() - 1
+            and not self.__is_next_flashcard_button_disabled
+        ):
+            self.__window_layout.get_next_flashcard_button().setDisabled(True)
+            self.__is_next_flashcard_button_disabled = True
+        elif (
+            self.__current_flashcard_index < self.get_num_flashcards() - 1
+            and self.__is_next_flashcard_button_disabled
+        ):
+            self.__window_layout.get_next_flashcard_button().setDisabled(False)
+            self.__is_next_flashcard_button_disabled = False
+
+    def __update_previous_card_button_state(self) -> None:
+        if self.__current_card_index > 0 and self.__is_previous_card_button_disabled:
+            self.__window_layout.get_back_card_button().setDisabled(False)
+            self.__is_previous_card_button_disabled = False
+        elif (
+            self.__current_card_index == 0
+            and not self.__is_previous_card_button_disabled
+        ):
+            self.__window_layout.get_back_card_button().setDisabled(True)
+            self.__is_previous_card_button_disabled = True
+
+    def __update_next_card_button_state(self) -> None:
         if (
             self.__current_card_index == self.__num_cards - 1
-            and not self.__is_next_button_disabled
+            and not self.__is_next_card_button_disabled
         ):
             self.__window_layout.get_next_card_button().setDisabled(True)
-            self.__is_next_button_disabled = True
+            self.__is_next_card_button_disabled = True
         elif (
             self.__current_card_index < self.__num_cards - 1
-            and self.__is_next_button_disabled
+            and self.__is_next_card_button_disabled
         ):
             self.__window_layout.get_next_card_button().setDisabled(False)
-            self.__is_next_button_disabled = False
+            self.__is_next_card_button_disabled = False
 
     def __update_card(self, event) -> None:
         if (
@@ -263,7 +334,7 @@ class PDFWindowVisualizationModel:
         self.__num_cards += 1
 
     def get_num_flashcards(self) -> int:
-        return self.__num_cards - self.__num_pdf_pages
+        return len(self.__num_flashcard_to_card_index)
 
     def get_new_flashcard(self) -> Optional[Flashcard]:
         flashcard: Flashcard = Flashcard()
@@ -312,9 +383,9 @@ class PDFWindowVisualizationModel:
         )
 
 
-def merge_cards(
+def merge_cards_ordered(
     flashcards_per_page: dict[int, list[Flashcard]], num_pdf_pages: int
-) -> tuple[list[Card], list[int], list[int]]:
+) -> tuple[list[Card], list[int], list[int], dict[int, int]]:
     """Merge the flashcards and the pages in the correct order.
 
     It orders the flashcards and the pdf pages in a unique list that matches the visualization outcome.
@@ -328,8 +399,8 @@ def merge_cards(
 
     Returns
     -------
-    tuple[list[Card]], list[int], list[int]]
-    The first returned parameter is a list of all ordered cards to be displayed. The second element is a vector that stores for each pdf page number the corresponding visualization position. The last returned value does the same with flashcards.
+    tuple[list[Card]], list[int], list[int], dict[int, int]]
+    The first returned parameter is a list of all ordered cards to be displayed. The second element is a vector that stores for each pdf page number the corresponding visualization position. The third returned value does the same with flashcards. The last is a dictionary that can be used to convert from a flashcard card_index to a flashcard_index
 
     """
     # sort the flashcards by page number, same page number leaves the order that there was before. In this way the order in which the user put the flashcards is left
@@ -342,32 +413,45 @@ def merge_cards(
     num_cards: int = num_flashcards + num_pdf_pages
 
     card_pos: int
-    index_quest_to_add: int = 0
+    index_flashcard_to_add: int = 0
     index_pdf_page_to_add: int = 0
 
     num_pdf_page_to_card_index: list[int] = []
     num_flashcard_to_card_index: list[int] = []
+    num_card_index_to_flashcard_index: dict[int, int] = dict()
     merged_cards: list[Card] = []
     for card_pos in range(0, num_cards, 1):
         card: Card
-        if index_quest_to_add == num_flashcards:
+        if index_flashcard_to_add == num_flashcards:
             card = PdfPage(index_pdf_page_to_add)
             num_pdf_page_to_card_index.append(len(merged_cards))
             index_pdf_page_to_add += 1
         elif index_pdf_page_to_add == num_pdf_pages:
-            card = flashcards[index_quest_to_add]
+            card = flashcards[index_flashcard_to_add]
             num_flashcard_to_card_index.append(len(merged_cards))
-            index_quest_to_add += 1
+            num_card_index_to_flashcard_index[
+                len(merged_cards)
+            ] = index_flashcard_to_add
+            index_flashcard_to_add += 1
         elif (
-            flashcards[index_quest_to_add].get_reference_page() <= index_pdf_page_to_add
+            flashcards[index_flashcard_to_add].get_reference_page()
+            <= index_pdf_page_to_add
         ):
-            card = flashcards[index_quest_to_add]
+            card = flashcards[index_flashcard_to_add]
             num_flashcard_to_card_index.append(len(merged_cards))
-            index_quest_to_add += 1
+            num_card_index_to_flashcard_index[
+                len(merged_cards)
+            ] = index_flashcard_to_add
+            index_flashcard_to_add += 1
         else:
             card = PdfPage(index_pdf_page_to_add)
             num_pdf_page_to_card_index.append(len(merged_cards))
             index_pdf_page_to_add += 1
         merged_cards.append(card)
 
-    return (merged_cards, num_pdf_page_to_card_index, num_flashcard_to_card_index)
+    return (
+        merged_cards,
+        num_pdf_page_to_card_index,
+        num_flashcard_to_card_index,
+        num_card_index_to_flashcard_index,
+    )
