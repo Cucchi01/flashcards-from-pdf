@@ -28,7 +28,7 @@ class PDFWindowVisualizationLayout(QWidget):
         # header
         self.__shuffle_button: QPushButton
         self.__pdf_page_num_spinbox: QSpinBox
-        self.__back_page_button: QPushButton
+        self.__previous_page_button: QPushButton
         self.__next_page_button: QPushButton
         self.__advanced_options_button: QPushButton
 
@@ -49,7 +49,7 @@ class PDFWindowVisualizationLayout(QWidget):
 
         # bottom
         self.__previous_flashcard_button: QPushButton
-        self.__back_card_button: QPushButton
+        self.__previous_card_button: QPushButton
         self.__next_card_button: QPushButton
         self.__next_flashcard_button: QPushButton
         self.__is_back_card_button_disabled: bool = True
@@ -106,13 +106,12 @@ class PDFWindowVisualizationLayout(QWidget):
         page_pos_layout = QWidget(self)
         layout = QHBoxLayout()
 
-        self.__back_page_button = QPushButton()
-        self.__back_page_button.setText("Previous Page")
-        self.__back_page_button.setDisabled(True)
+        self.__previous_page_button = QPushButton()
+        self.__previous_page_button.setText("Previous Page")
+        self.__previous_page_button.setDisabled(True)
 
         self.__next_page_button = QPushButton()
         self.__next_page_button.setText("Next Page")
-        self.__next_page_button.setDisabled(True)
 
         label = QLabel("Pdf page:", page_pos_layout)
         self.__pdf_page_num_spinbox = QSpinBox(page_pos_layout)
@@ -124,7 +123,7 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__advanced_options_button.setText("Advanced options")
         self.__advanced_options_button.setDisabled(True)
 
-        layout.addWidget(self.__back_page_button)
+        layout.addWidget(self.__previous_page_button)
         layout.addWidget(self.__next_page_button)
         layout.addWidget(label)
         layout.addWidget(self.__pdf_page_num_spinbox)
@@ -222,9 +221,9 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__previous_flashcard_button.setFont(bold_font)
         self.__previous_flashcard_button.setDisabled(True)
 
-        self.__back_card_button = QPushButton()
-        self.__back_card_button.setText("<< Back")
-        self.__back_card_button.setDisabled(True)
+        self.__previous_card_button = QPushButton()
+        self.__previous_card_button.setText("<< Back")
+        self.__previous_card_button.setDisabled(True)
 
         self.__next_card_button = QPushButton()
         self.__next_card_button.setText("Next >>")
@@ -234,7 +233,7 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__next_flashcard_button.setFont(bold_font)
 
         layout_current_card.addWidget(self.__previous_flashcard_button)
-        layout_current_card.addWidget(self.__back_card_button)
+        layout_current_card.addWidget(self.__previous_card_button)
         layout_current_card.addWidget(self.__next_card_button)
         layout_current_card.addWidget(self.__next_flashcard_button)
 
@@ -297,11 +296,17 @@ class PDFWindowVisualizationLayout(QWidget):
     def get_pdf_nav(self) -> QtPdf.QPdfPageNavigator:
         return self.__pdf_nav
 
+    def get_previous_page_button(self) -> QPushButton:
+        return self.__previous_page_button
+
     def get_previous_flashcard_button(self) -> QPushButton:
         return self.__previous_flashcard_button
 
+    def get_next_page_button(self) -> QPushButton:
+        return self.__next_page_button
+
     def get_back_card_button(self) -> QPushButton:
-        return self.__back_card_button
+        return self.__previous_card_button
 
     def get_next_card_button(self) -> QPushButton:
         return self.__next_card_button

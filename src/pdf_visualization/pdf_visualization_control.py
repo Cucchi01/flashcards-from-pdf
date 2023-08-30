@@ -44,15 +44,18 @@ class PDFWindowVisualizationControl:
         self.__set_controls_page_position_layout()
 
     def __set_controls_page_position_layout(self) -> None:
-        # TODO: manage back_page and next_page
         self.__pdf_window_layout.get_pdf_page_num_spinbox().valueChanged.connect(
             self.__pdf_window_model.update_page_spinbox_change
         )
-        # self.back_page_button.clicked.connect(self.__previous_card)
-        # self.next_page_button.clicked.connect(self.__previous_card)
+
+        self.__pdf_window_layout.get_previous_page_button().clicked.connect(
+            self.__pdf_window_model.previous_page
+        )
+        self.__pdf_window_layout.get_next_page_button().clicked.connect(
+            self.__pdf_window_model.next_page
+        )
 
     def __set_controls_left_panel_widget(self) -> None:
-        # TODO: add the management of the flashcards
         self.shortcut_zoom_increase = QShortcut(
             QKeySequence("Ctrl++"), self.__pdf_window_layout
         )
