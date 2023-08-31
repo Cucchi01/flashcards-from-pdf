@@ -86,21 +86,20 @@ class PDFWindowVisualizationControl:
         self.__set_controls_current_flashcard_bottom_layout()
 
     def __set_controls_current_card_bottom_layout(self) -> None:
-        self.__pdf_window_layout.get_previous_flashcard_button().clicked.connect(
-            self.__pdf_window_model.previous_flashcard
-        )
         self.__pdf_window_layout.get_back_card_button().clicked.connect(
             self.__pdf_window_model.previous_card
         )
         self.__pdf_window_layout.get_next_card_button().clicked.connect(
             self.__pdf_window_model.next_card
         )
-        self.__pdf_window_layout.get_next_flashcard_button().clicked.connect(
-            self.__pdf_window_model.next_flashcard
-        )
 
     def __set_controls_current_flashcard_bottom_layout(self) -> None:
         # TODO: manage correct and mistake answers
-        # self.mistake_button.clicked.connect(self.__previous_card)
-        # self.correct_button.clicked.connect(self.__next_card)
+        self.__pdf_window_layout.get_previous_flashcard_button().clicked.connect(
+            self.__pdf_window_model.previous_flashcard
+        )
+
+        self.__pdf_window_layout.get_next_flashcard_button().clicked.connect(
+            self.__pdf_window_model.next_flashcard
+        )
         pass
