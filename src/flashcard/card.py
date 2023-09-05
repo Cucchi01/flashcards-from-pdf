@@ -13,6 +13,10 @@ class Card(ABC):
     def get_pdf_page(self) -> int:
         pass
 
+    @abstractmethod
+    def compare_to(self, value: "Card") -> bool:
+        pass
+
     def get_pdf_page_for_visualization(self) -> int:
         return self.get_pdf_page() + 1
 

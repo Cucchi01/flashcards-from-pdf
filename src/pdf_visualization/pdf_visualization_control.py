@@ -38,7 +38,7 @@ class PDFWindowVisualizationControl:
     def __set_controls_header_widget(self) -> None:
         # header
         self.__pdf_window_layout.get_shuffle_button().clicked.connect(
-            self.__pdf_window_model.shuffle_cards
+            self.__pdf_window_model.shuffle_button_pressed
         )
 
         self.__set_controls_page_position_layout()
@@ -86,7 +86,7 @@ class PDFWindowVisualizationControl:
         self.__set_controls_current_flashcard_bottom_layout()
 
     def __set_controls_current_card_bottom_layout(self) -> None:
-        self.__pdf_window_layout.get_back_card_button().clicked.connect(
+        self.__pdf_window_layout.get_previous_card_button().clicked.connect(
             self.__pdf_window_model.previous_card
         )
         self.__pdf_window_layout.get_next_card_button().clicked.connect(

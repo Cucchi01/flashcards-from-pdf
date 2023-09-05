@@ -305,7 +305,7 @@ class PDFWindowVisualizationLayout(QWidget):
     def get_next_page_button(self) -> QPushButton:
         return self.__next_page_button
 
-    def get_back_card_button(self) -> QPushButton:
+    def get_previous_card_button(self) -> QPushButton:
         return self.__previous_card_button
 
     def get_next_card_button(self) -> QPushButton:

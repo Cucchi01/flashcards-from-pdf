@@ -108,3 +108,15 @@ class Flashcard(Card):
                 self.get_current_result().to_string(),
             ]
         )
+
+    def compare_to(self, value: "Flashcard") -> bool:
+        if (
+            self.get_question() == value.get_question()
+            and self.get_answer() == value.get_answer()
+            and self.get_question_type().value == value.get_question_type().value
+            and self.get_past_results() == value.get_past_results()
+            and self.get_current_result() == value.get_current_result()
+        ):
+            return True
+        else:
+            return False
