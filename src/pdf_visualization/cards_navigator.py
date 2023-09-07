@@ -100,8 +100,12 @@ class CardNavigator:
 
     def __get_new_card_index_page_buttons(self, next_page_index: int) -> int:
         new_card_index: int
-        if self.__get_is_deck_ordered() or isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], PdfPage
+        if (
+            True
+            or self.__get_is_deck_ordered()
+            or isinstance(
+                self.__get_cards_to_display()[self.__current_card_index], PdfPage
+            )
         ):
             new_card_index = self.__get_num_pdf_page_to_card_index()[next_page_index]
         else:
@@ -308,15 +312,10 @@ class CardNavigator:
     def __update_next_page_button_state(self) -> None:
         next_page_index: int = self.__get_next_page_index()
 
-        if (
-            next_page_index < 0 or next_page_index == self.__get_num_pdf_pages()
-        ) and not self.__is_next_page_button_disabled:
+        if next_page_index < 0 or next_page_index == self.__get_num_pdf_pages():
             self.__get_next_page_button().setDisabled(True)
             self.__is_next_page_button_disabled = True
-        elif (
-            next_page_index < self.__get_num_pdf_pages()
-            and self.__is_next_page_button_disabled
-        ):
+        elif next_page_index < self.__get_num_pdf_pages():
             self.__get_next_page_button().setDisabled(False)
             self.__is_next_page_button_disabled = False
 
@@ -338,16 +337,10 @@ class CardNavigator:
 
     def __update_previous_flashcard_button_state(self) -> None:
         previous_flashcard_index: int = self.__get_index_flashcard_before()
-        if (
-            previous_flashcard_index >= 0
-            and self.__is_previous_flashcard_button_disabled
-        ):
+        if previous_flashcard_index >= 0:
             self.__get_previous_flashcard_button().setDisabled(False)
             self.__is_previous_flashcard_button_disabled = False
-        elif (
-            previous_flashcard_index == -1
-            and not self.__is_previous_flashcard_button_disabled
-        ):
+        elif previous_flashcard_index == -1:
             self.__get_previous_flashcard_button().setDisabled(True)
             self.__is_previous_flashcard_button_disabled = True
 
@@ -356,16 +349,10 @@ class CardNavigator:
 
     def __update_next_flashcard_button_state(self) -> None:
         next_flashcard_index = self.__get_next_flashcard_index()
-        if (
-            next_flashcard_index == self.__get_num_flashcards()
-            and not self.__is_next_flashcard_button_disabled
-        ):
+        if next_flashcard_index == self.__get_num_flashcards():
             self.__get_next_flashcard_button().setDisabled(True)
             self.__is_next_flashcard_button_disabled = True
-        elif (
-            next_flashcard_index < self.__get_num_flashcards()
-            and self.__is_next_flashcard_button_disabled
-        ):
+        elif next_flashcard_index < self.__get_num_flashcards():
             self.__get_next_flashcard_button().setDisabled(False)
             self.__is_next_flashcard_button_disabled = False
 
@@ -388,7 +375,7 @@ class CardNavigator:
             self.__get_previous_card_button().setDisabled(True)
             self.__is_previous_card_button_disabled = True
 
-        elif self.__current_card_index > 0 and self.__is_previous_card_button_disabled:
+        elif self.__current_card_index > 0:
             self.__get_previous_card_button().setDisabled(False)
             self.__is_previous_card_button_disabled = False
 
@@ -399,19 +386,13 @@ class CardNavigator:
             flashcard: Flashcard = self.__get_cards_to_display()[
                 self.__current_card_index
             ]
-            if (
-                flashcard.get_answer() == self.__get_flashcard_label_text()
-                and self.__is_previous_card_button_disabled
-            ):
+            if flashcard.get_answer() == self.__get_flashcard_label_text():
                 self.__get_previous_card_button().setDisabled(False)
                 self.__is_previous_card_button_disabled = False
-            elif not self.__is_previous_card_button_disabled:
+            else:
                 self.__get_previous_card_button().setDisabled(True)
                 self.__is_previous_card_button_disabled = True
-        elif (
-            self.__current_card_index == 0
-            and not self.__is_previous_card_button_disabled
-        ):
+        elif self.__current_card_index == 0:
             self.__get_previous_card_button().setDisabled(True)
             self.__is_previous_card_button_disabled = True
 
@@ -429,25 +410,16 @@ class CardNavigator:
             flashcard: Flashcard = self.__get_cards_to_display()[
                 self.__current_card_index
             ]
-            if (
-                flashcard.get_question() == self.__get_flashcard_label_text()
-                and self.__is_next_card_button_disabled
-            ):
-                self.__get_previous_card_button().setDisabled(False)
-                self.__is_previous_card_button_disabled = False
-            elif not self.__is_next_card_button_disabled:
-                self.__get_previous_card_button().setDisabled(True)
-                self.__is_previous_card_button_disabled = True
-        elif (
-            self.__current_card_index == self.__get_num_cards() - 1
-            and not self.__is_next_card_button_disabled
-        ):
+            if flashcard.get_question() == self.__get_flashcard_label_text():
+                self.__get_next_card_button().setDisabled(False)
+                self.__is_next_card_button_disabled = False
+            else:
+                self.__get_next_card_button().setDisabled(True)
+                self.__is_next_card_button_disabled = True
+        elif self.__current_card_index == self.__get_num_cards() - 1:
             self.__get_next_card_button().setDisabled(True)
             self.__is_next_card_button_disabled = True
-        elif (
-            self.__current_card_index < self.__get_num_cards() - 1
-            and self.__is_next_card_button_disabled
-        ):
+        elif self.__current_card_index < self.__get_num_cards() - 1:
             self.__get_next_card_button().setDisabled(False)
             self.__is_next_card_button_disabled = False
 
