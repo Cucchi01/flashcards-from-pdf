@@ -80,11 +80,11 @@ class PDFWindowVisualizationModel:
     def get_num_cards(self) -> int:
         return len(self.__cards_to_display)
 
-    def get_question_label(self) -> str:
-        return self.__window_layout.get_question_label().text()
+    def get_flashcard_label_text(self) -> str:
+        return self.__window_layout.get_flashcard_label().text()
 
-    def set_question_label(self, new_string: str) -> str:
-        return self.__window_layout.get_question_label().setText(new_string)
+    def set_flashcard_label_text(self, new_string: str) -> str:
+        return self.__window_layout.get_flashcard_label().setText(new_string)
 
     def get_previous_page_button(self) -> QPushButton:
         return self.__window_layout.get_previous_page_button()
@@ -205,7 +205,7 @@ class PDFWindowVisualizationModel:
 
         element_to_display: Card = self.__cards_to_display[current_card_index]
         if isinstance(element_to_display, PdfPage):
-            self.__window_layout.get_question_label().setVisible(False)
+            self.__window_layout.get_flashcard_label().setVisible(False)
             self.__window_layout.get_pdf_nav().jump(
                 element_to_display.get_pdf_page(), self.__point
             )
@@ -213,8 +213,8 @@ class PDFWindowVisualizationModel:
         elif isinstance(element_to_display, Flashcard):
             quest: Flashcard = element_to_display
             self.__window_layout.get_pdf_view().setVisible(False)
-            self.__window_layout.get_question_label().setText(quest.get_question())
-            self.__window_layout.get_question_label().setVisible(True)
+            self.__window_layout.get_flashcard_label().setText(quest.get_question())
+            self.__window_layout.get_flashcard_label().setVisible(True)
         else:
             raise TypeError("Class type is different from what is expected")
         return None
