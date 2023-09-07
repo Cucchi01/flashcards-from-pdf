@@ -15,7 +15,7 @@ class IOFlashcards:
     @staticmethod
     def get_past_tests_info(path_of_file: str) -> PDFTestsInfo:
         pdf_test_info: PDFTestsInfo = PDFTestsInfo()
-        with open(path_of_file, "r") as file:
+        with open(path_of_file, "r", encoding="utf-8") as file:
             num_test: int = int(file.readline())
             pdf_test_info.set_num_completed_tests(num_test)
             for i in range(0, num_test):
@@ -32,7 +32,7 @@ class IOFlashcards:
     @staticmethod
     def get_flashcards_from_pdf(path_of_file: str) -> dict[int, list[Flashcard]]:
         flashcards: dict[int, list[Flashcard]] = dict()
-        with open(path_of_file, "r") as file:
+        with open(path_of_file, "r", encoding="utf-8") as file:
             IOFlashcards.__skip_history_tests(file)
 
             # check ongoing test
@@ -142,7 +142,7 @@ class IOFlashcards:
             while os.path.exists(tmp_path_without_ext + ".txt"):
                 tmp_path_without_ext = "".join([tmp_path_without_ext, "_app"])
 
-        with open(tmp_path_without_ext + ".txt", "w") as file:
+        with open(tmp_path_without_ext + ".txt", "w", encoding="utf-8") as file:
             file.write(pdf_test_info.to_string())
             file.write(str(num_flashcards) + "\n")
 

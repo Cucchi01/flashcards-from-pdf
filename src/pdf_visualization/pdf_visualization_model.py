@@ -28,7 +28,7 @@ class PDFWindowVisualizationModel:
         is_flashcards_file_present: bool = os.path.isfile(path_of_flashcards)
 
         if not is_flashcards_file_present:
-            with open(path_of_flashcards, "w") as file:
+            with open(path_of_flashcards, "w", encoding="utf-8") as file:
                 file.write("0\n0\n0\n")
 
         self.__io_flashcards_info: PDFTestsInfo = IOFlashcards.get_past_tests_info(

@@ -115,6 +115,12 @@ class DecksStructure(QTreeWidget):
         )
         update_button.triggered.connect(self.__update_pdf)
 
+        export_anki_button = QAction("Export flashcards to Anki", self.menu_right_click)
+        export_anki_button.setStatusTip(
+            "Exports the flashcards made on this PDF to Anki"
+        )
+        export_anki_button.triggered.connect(self.__export_to_anki)
+
         self.menu_right_click.addAction(update_button)
 
     def __open_right_click_menu(self, event) -> None:
@@ -130,6 +136,9 @@ class DecksStructure(QTreeWidget):
 
     def __update_pdf(self, event) -> None:
         update_pdf(self.path_pdf_to_update)
+
+    def __export_to_anki(self, event) -> None:
+        pass
 
     def __on_entry_double_clicked(
         self, entry_pressed: QTreeWidgetItem, col_pressed: int
