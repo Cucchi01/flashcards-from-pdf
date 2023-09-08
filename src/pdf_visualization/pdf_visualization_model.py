@@ -61,6 +61,7 @@ class PDFWindowVisualizationModel:
         )
 
         self.__setup_window_layout()
+        self.__cards_navigator.change_card_index(0)
 
     def get_flashcards_from_pdf_page(self) -> dict[int, list[Flashcard]]:
         return self.__flashcards_from_pdf_page

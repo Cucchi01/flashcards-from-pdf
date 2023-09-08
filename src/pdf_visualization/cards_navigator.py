@@ -352,7 +352,10 @@ class CardNavigator:
         if next_flashcard_index == self.__get_num_flashcards():
             self.__get_next_flashcard_button().setDisabled(True)
             self.__is_next_flashcard_button_disabled = True
-        elif next_flashcard_index < self.__get_num_flashcards():
+        elif (
+            next_flashcard_index >= 0
+            and next_flashcard_index < self.__get_num_flashcards()
+        ):
             self.__get_next_flashcard_button().setDisabled(False)
             self.__is_next_flashcard_button_disabled = False
 
@@ -560,7 +563,9 @@ def merge_cards_shuffle(
         num_pdf_page_to_card_index,
         pdf_pages_referenced_by_flashcard,
     )
-    last_flashcard: Flashcard = flashcards[-1]
+    last_flashcard: Flashcard = None
+    if len(flashcards) != 0:
+        last_flashcard = flashcards[-1]
     add_remaining_pdf_pages(
         num_pdf_pages,
         pdf_pages_referenced_by_flashcard,
