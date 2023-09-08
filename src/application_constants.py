@@ -1,6 +1,8 @@
+from PyQt6.QtGui import QFont
+
 import os
 
-from PyQt6.QtGui import QFont
+from private_application_constants import PRIVATE_ANKI_CONTENT_DIRECTORY
 
 APPLICATION_NAME = "Flashcards from PDF"
 PATH_TO_DECKS_FROM_SRC = "../data/"
@@ -21,3 +23,5 @@ ONGOING_TEST_FLAG_YES = "1"
 ONGOING_TEST_FLAG_NO = "0"
 NO_ANSWER_FLAG = "!-!"
 FILE_FLASHCARDS_SEPARATOR = " ?^? "
+ANKI_FLASHCARDS_SEPARATOR = "\t"
+ANKI_CONTENT_DIRECTORY = PRIVATE_ANKI_CONTENT_DIRECTORY

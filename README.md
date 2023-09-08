@@ -21,3 +21,5 @@ num_page ?^? questions ?^? answer['!-!'= no answer] ?^? type['g'=general|'p'=pag
 
 The reference page index is in 1-based format, because in this way a user can read a txt file and make sense if it. Sometimes this software is not available, but it can read the txt file. In the codebase the index of a pdf page is saved and used in 0-based format.  
 There is always a +1 in the visualizazion process. So in the txt a generic page has as index -1 and internally it is store -2.
+
+It is possible to export the flashcards to a txt file that it is compatible with Anki. The txt file has to be imported manually in Anki and it is saved in data\Anki. The pdf pages related to a question are converted to jpg and saved in the media directory of Anki. The same relative path of the pdf is copied in the Anki media directory and in data\Anki.

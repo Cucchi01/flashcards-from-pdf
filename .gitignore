@@ -4,6 +4,7 @@
 #personal
 private_pdf/
 private_*
+Anki/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

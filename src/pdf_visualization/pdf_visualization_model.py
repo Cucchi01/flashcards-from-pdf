@@ -36,7 +36,7 @@ class PDFWindowVisualizationModel:
         )
         self.__flashcards_from_pdf_page: dict[
             int, list[Flashcard]
-        ] = IOFlashcards.get_flashcards_from_pdf(path_of_flashcards)
+        ] = IOFlashcards.get_flashcards_from_txt(path_of_flashcards)
 
         self.__path_of_pdf: str = path_of_pdf
         self.__filename: str = os.path.basename(path_of_pdf)
@@ -290,6 +290,7 @@ class PDFWindowVisualizationModel:
         # self.get_num_cards() += 1
 
     def get_num_flashcards(self) -> int:
+        # TODO: modify this and make it compatible with add_flashcards
         return len(self.__num_flashcard_to_card_index)
 
     def get_new_flashcard(self) -> Optional[Flashcard]:

@@ -1,4 +1,11 @@
-from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QStyle, QMenu, QHeaderView
+from PyQt6.QtWidgets import (
+    QTreeWidget,
+    QTreeWidgetItem,
+    QStyle,
+    QMenu,
+    QHeaderView,
+    QApplication,
+)
 from PyQt6.QtGui import QColor, QFont, QAction, QCursor
 from PyQt6.QtCore import Qt
 
@@ -10,6 +17,7 @@ from pdf_visualization.pdf_visualization_control import PDFWindowVisualizationCo
 from pdf_visualization.pdf_visualization_layout import PDFWindowVisualizationLayout
 from deck_directory import DirectoryEntryFolder, DirectoryEntryFile, FILE, FOLDER
 from update_pdf import update_pdf
+from IO_flashcards_management import IOFlashcards
 
 
 class DecksStructure(QTreeWidget):
@@ -122,6 +130,7 @@ class DecksStructure(QTreeWidget):
         export_anki_button.triggered.connect(self.__export_to_anki)
 
         self.menu_right_click.addAction(update_button)
+        self.menu_right_click.addAction(export_anki_button)
 
     def __open_right_click_menu(self, event) -> None:
         selected_items = self.selectedItems()
@@ -138,7 +147,9 @@ class DecksStructure(QTreeWidget):
         update_pdf(self.path_pdf_to_update)
 
     def __export_to_anki(self, event) -> None:
-        pass
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        IOFlashcards.save_flashcards_to_anki(self.path_pdf_to_update)
+        QApplication.restoreOverrideCursor()
 
     def __on_entry_double_clicked(
         self, entry_pressed: QTreeWidgetItem, col_pressed: int
