@@ -181,92 +181,60 @@ class IOFlashcards:
             int, list[Flashcard]
         ] = IOFlashcards.get_flashcards_from_txt(path_without_ext + ".txt")
 
-        IOFlashcards.save_flashcards_to_anki_txt(path_of_pdf, flashcards_from_pdf_page)
+        IOFlashcards.__save_flashcards_to_anki_txt(
+            path_of_pdf, flashcards_from_pdf_page
+        )
 
     @staticmethod
-    def save_flashcards_to_anki_txt(
+    def __save_flashcards_to_anki_txt(
         path_of_file: str,  # could be the pathname of the pdf or the txt
         flashcards_from_pdf_page: dict[int, list[Flashcard]],
     ) -> None:
         path_without_ext: str
-        basename_pdf: str = os.path.basename(path_of_file)
-        basename_pdf_without_ext, _ = os.path.splitext(basename_pdf)
-        path_without_ext, _ = os.path.splitext(path_of_file)
-
-        path_of_pdf: str = path_without_ext + ".pdf"
-        if os.path.exists(path_of_pdf) == False:
-            raise IOError("Not existing path: " + path_of_pdf)
-
-        print(os.getcwd())
-        relative_file_position: str = path_without_ext.removeprefix(
-            os.getcwd() + "\\data"
-        )
         relative_directory_position_anki: str
-        relative_directory_position_anki, _ = os.path.splitext(relative_file_position)
-        relative_directory_position_anki = "\\data" + relative_directory_position_anki
-        path_without_ext = os.getcwd() + "\\data\\Anki" + relative_file_position
+        path_of_pdf: str
+        basename_pdf_without_ext: str
+        media_folder_anki: str
+        (
+            path_without_ext,
+            relative_directory_position_anki,
+            path_of_pdf,
+            basename_pdf_without_ext,
+            media_folder_anki,
+        ) = IOFlashcards.__get_path_information_to_anki(path_of_file)
 
-        tmp_path_without_ext: str = path_without_ext
-        is_path_already_existing: bool = os.path.exists(path_without_ext + ".txt")
-        if is_path_already_existing:
-            while os.path.exists(tmp_path_without_ext + ".txt"):
-                tmp_path_without_ext = "".join([tmp_path_without_ext, "_app"])
+        tmp_path_without_ext: str
+        is_path_already_existing: bool
+        (
+            tmp_path_without_ext,
+            is_path_already_existing,
+        ) = IOFlashcards.__get_tmp_path_without_ext(path_without_ext)
 
         os.makedirs(os.path.dirname(tmp_path_without_ext + ".txt"), exist_ok=True)
+        os.makedirs(media_folder_anki, exist_ok=True)
+
         with open(tmp_path_without_ext + ".txt", "w", encoding="utf-8") as file:
             file.write("#separator:tab\n#html:true\n")
 
             list_flashcards: list[Flashcard]
             reference_page: int
-            media_folder_anki: str = os.path.expandvars(
-                ANKI_CONTENT_DIRECTORY + relative_directory_position_anki
-            )
-
-            os.makedirs(media_folder_anki, exist_ok=True)
 
             for reference_page, list_flashcards in sorted(
                 flashcards_from_pdf_page.items(), key=lambda x: x[0]
             ):
                 for flashcard in list_flashcards:
-                    # TODO: save also the images from the pdf
                     if (
                         flashcard.get_question_type()
                         == Flashcard.QuestionType.PAGE_SPECIFIC
                     ):
-                        filename: str = (
-                            date.today().strftime("%y_%m_%d")
-                            + "_"
-                            + basename_pdf_without_ext
-                            + "_"
-                            + str(flashcard.get_pdf_page())
-                            + "_"
-                            + str(randint(0, 10000)).zfill(5)
-                            + ".jpg"
-                        )
-                        page: list[PILImage.Image] = convert_from_path(
+                        IOFlashcards.__save_page_sp_flashcard_to_anki_txt(
+                            file,
+                            flashcard,
                             path_of_pdf,
-                            dpi=200,
-                            first_page=flashcard.get_pdf_page() + 1,  # base-1
-                            last_page=flashcard.get_pdf_page() + 1,  # base-1
+                            basename_pdf_without_ext,
+                            media_folder_anki,
+                            relative_directory_position_anki,
                         )
-                        if len(page) == 0:
-                            raise ValueError("No page")
-                        if not os.path.exists(media_folder_anki + r"\\" + filename):
-                            page[0].save(media_folder_anki + r"\\" + filename, "JPEG")
-                            file.write(
-                                ANKI_FLASHCARDS_SEPARATOR.join(
-                                    [
-                                        flashcard.get_question(),
-                                        '"'
-                                        + flashcard.get_answer()
-                                        + '<br><img src=""'
-                                        + relative_directory_position_anki
-                                        + "\\"
-                                        + filename
-                                        + '"">"\n',
-                                    ]
-                                )
-                            )
                     else:
                         file.write(
                             ANKI_FLASHCARDS_SEPARATOR.join(
@@ -280,3 +248,91 @@ class IOFlashcards:
         if is_path_already_existing:
             os.remove(path_without_ext + ".txt")
             os.rename(tmp_path_without_ext + ".txt", path_without_ext + ".txt")
+
+    @staticmethod
+    def __get_path_information_to_anki(
+        path_of_file: str,
+    ) -> tuple[str, str, str, str, str]:
+        path_without_ext: str
+        basename_pdf: str = os.path.basename(path_of_file)
+        basename_pdf_without_ext, _ = os.path.splitext(basename_pdf)
+        path_without_ext, _ = os.path.splitext(path_of_file)
+
+        path_of_pdf: str = path_without_ext + ".pdf"
+        if os.path.exists(path_of_pdf) == False:
+            raise IOError("Not existing path: " + path_of_pdf)
+
+        relative_file_position: str = path_without_ext.removeprefix(
+            os.getcwd() + "\\data"
+        )
+        relative_directory_position_anki: str
+        relative_directory_position_anki, _ = os.path.splitext(relative_file_position)
+        relative_directory_position_anki = "\\data" + relative_directory_position_anki
+        path_without_ext = os.getcwd() + "\\data\\Anki" + relative_file_position
+
+        media_folder_anki: str = os.path.expandvars(
+            ANKI_CONTENT_DIRECTORY + relative_directory_position_anki
+        )
+
+        return (
+            path_without_ext,
+            relative_directory_position_anki,
+            path_of_pdf,
+            basename_pdf_without_ext,
+            media_folder_anki,
+        )
+
+    @staticmethod
+    def __get_tmp_path_without_ext(path_without_ext: str) -> tuple[str, bool]:
+        tmp_path_without_ext: str = path_without_ext
+        is_path_already_existing: bool = os.path.exists(path_without_ext + ".txt")
+        if is_path_already_existing:
+            while os.path.exists(tmp_path_without_ext + ".txt"):
+                tmp_path_without_ext = "".join([tmp_path_without_ext, "_app"])
+        return (tmp_path_without_ext, is_path_already_existing)
+
+    @staticmethod
+    def __save_page_sp_flashcard_to_anki_txt(
+        file: TextIOWrapper,
+        flashcard: Flashcard,
+        path_of_pdf: str,
+        basename_pdf_without_ext: str,
+        media_folder_anki: str,
+        relative_directory_position_anki: str,
+    ) -> None:
+        filename: str = (
+            date.today().strftime("%y_%m_%d")
+            + "_"
+            + basename_pdf_without_ext
+            + "_"
+            + str(flashcard.get_pdf_page())
+            + "_"
+            + str(randint(0, 10000)).zfill(5)
+            + ".jpg"
+        )
+
+        page: list[PILImage.Image] = convert_from_path(
+            path_of_pdf,
+            dpi=200,
+            first_page=flashcard.get_pdf_page() + 1,  # base-1
+            last_page=flashcard.get_pdf_page() + 1,  # base-1
+        )
+        if len(page) == 0:
+            raise ValueError("No page")
+
+        if not os.path.exists(media_folder_anki + r"\\" + filename):
+            page[0].save(media_folder_anki + r"\\" + filename, "JPEG")
+            file.write(
+                ANKI_FLASHCARDS_SEPARATOR.join(
+                    [
+                        flashcard.get_question(),
+                        '"'
+                        + flashcard.get_answer()
+                        + '<br><img src=""'
+                        + relative_directory_position_anki
+                        + "\\"
+                        + filename
+                        + '"">"\n',
+                    ]
+                )
+            )
