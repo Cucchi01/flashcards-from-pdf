@@ -61,7 +61,7 @@ class PDFWindowVisualizationModel:
         )
 
         self.__setup_window_layout()
-        self.__cards_navigator.change_card_index(0)
+        self.__cards_navigator.set_current_card_index(0)
 
     def get_flashcards_from_pdf_page(self) -> dict[int, list[Flashcard]]:
         return self.__flashcards_from_pdf_page
@@ -118,32 +118,45 @@ class PDFWindowVisualizationModel:
         ].get_pdf_page()
 
     def shuffle_button_pressed(self) -> None:
-        if self.__is_deck_ordered:
-            self.__shuffle_cards()
-            self.__window_layout.get_shuffle_button().setText("Order")
-            self.__window_layout.get_pdf_page_num_spinbox().setDisabled(True)
-        else:
+        self.refresh_page(not self.__is_deck_ordered)
+
+    def refresh_page(self, is_deck_ordered: bool) -> None:
+        if is_deck_ordered:
             self.__reorder_cards()
             self.__window_layout.get_shuffle_button().setText("Shuffle")
             self.__window_layout.get_pdf_page_num_spinbox().setDisabled(False)
+        else:
+            self.__shuffle_cards()
+            self.__window_layout.get_shuffle_button().setText("Order")
+            self.__window_layout.get_pdf_page_num_spinbox().setDisabled(True)
+
+    def __reorder_cards(self) -> None:
+        self.__refresh_merged_cards(ordered_deck=True)
+        self.__is_deck_ordered = True
+        self.__cards_navigator.restart_visualization()
 
     def __shuffle_cards(self) -> None:
-        (
-            self.__cards_to_display,
-            self.__num_pdf_page_to_card_index,
-            self.__num_flashcard_to_card_index,
-        ) = merge_cards_shuffle(self.__flashcards_from_pdf_page, self.__num_pdf_pages)
+        self.__refresh_merged_cards(ordered_deck=False)
         self.__is_deck_ordered = False
         self.__cards_navigator.restart_visualization()
 
-    def __reorder_cards(self) -> None:
-        (
-            self.__cards_to_display,
-            self.__num_pdf_page_to_card_index,
-            self.__num_flashcard_to_card_index,
-        ) = merge_cards_ordered(self.__flashcards_from_pdf_page, self.__num_pdf_pages)
-        self.__is_deck_ordered = True
-        self.__cards_navigator.restart_visualization()
+    def __refresh_merged_cards(self, ordered_deck: bool) -> None:
+        if ordered_deck:
+            (
+                self.__cards_to_display,
+                self.__num_pdf_page_to_card_index,
+                self.__num_flashcard_to_card_index,
+            ) = merge_cards_ordered(
+                self.__flashcards_from_pdf_page, self.__num_pdf_pages
+            )
+        else:
+            (
+                self.__cards_to_display,
+                self.__num_pdf_page_to_card_index,
+                self.__num_flashcard_to_card_index,
+            ) = merge_cards_shuffle(
+                self.__flashcards_from_pdf_page, self.__num_pdf_pages
+            )
 
     def update_page_spinbox_change(self) -> None:
         if not self.__is_page_spinbox_event_disabled:
@@ -151,7 +164,7 @@ class PDFWindowVisualizationModel:
             if new_page_num < 0 or new_page_num >= self.__num_pdf_pages:
                 raise ValueError("Page value not valid")
 
-            self.__cards_navigator.change_card_index(
+            self.__cards_navigator.set_current_card_index(
                 self.__num_pdf_page_to_card_index[new_page_num]
             )
 
@@ -224,6 +237,8 @@ class PDFWindowVisualizationModel:
         return self.__window_layout
 
     def add_page_flashcard(self, flag_generic: bool = False) -> None:
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+
         app: Optional[Flashcard] = self.get_new_flashcard()
         if app is None:
             return
@@ -236,8 +251,13 @@ class PDFWindowVisualizationModel:
         index_in_list: int = self.__get_index_list_position()
 
         self.__add_flashcard_at_index(flashcard, index_in_list)
+        self.__cards_navigator.set_current_card_index(
+            self.__cards_navigator.get_current_card_index() + 1
+        )
         self.save_flashcard_to_file()
         self.clear_input_fields()
+
+        QApplication.restoreOverrideCursor()
 
     def __get_index_list_position(self) -> int:
         current_card: Card = self.__cards_to_display[
@@ -274,8 +294,7 @@ class PDFWindowVisualizationModel:
                 flashcard
             ]
 
-        # TODO: update cards in visualization
-        # self.get_num_cards() += 1
+        self.__refresh_merged_cards(self.__is_deck_ordered)
 
     def __add_flashcard_at_index(self, flashcard: Flashcard, index_in_list):
         if flashcard.get_reference_page() in self.__flashcards_from_pdf_page.keys():
@@ -287,11 +306,9 @@ class PDFWindowVisualizationModel:
                 flashcard
             ]
 
-        # TODO: update cards in visualization
-        # self.get_num_cards() += 1
+        self.__refresh_merged_cards(self.__is_deck_ordered)
 
     def get_num_flashcards(self) -> int:
-        # TODO: modify this and make it compatible with add_flashcards
         return len(self.__num_flashcard_to_card_index)
 
     def get_new_flashcard(self) -> Optional[Flashcard]:

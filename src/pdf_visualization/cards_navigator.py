@@ -66,7 +66,7 @@ class CardNavigator:
             self.__is_next_card_button_disabled = True
 
     def restart_visualization(self) -> None:
-        self.change_card_index(0)
+        self.set_current_card_index(0)
         self.__shuffle_pdf_navigator.set_is_page_navigator_active(False)
 
     def update_page_spinbox_change(self) -> None:
@@ -75,7 +75,7 @@ class CardNavigator:
             if new_page_num < 0 or new_page_num >= self.__get_num_pdf_pages():
                 raise ValueError("Page value not valid")
 
-            self.change_card_index(
+            self.set_current_card_index(
                 self.__get_num_pdf_page_to_card_index()[new_page_num]
             )
 
@@ -88,7 +88,7 @@ class CardNavigator:
         if index_page_before >= 0:
             new_card_index = self.__get_new_card_index_page_buttons(index_page_before)
             self.__check_activation_shuffle_navigator()
-            self.change_card_index(new_card_index)
+            self.set_current_card_index(new_card_index)
 
     def next_page(self) -> None:
         new_card_index: int
@@ -96,7 +96,7 @@ class CardNavigator:
         if next_page_index >= 0 and next_page_index < self.__get_num_pdf_pages():
             new_card_index = self.__get_new_card_index_page_buttons(next_page_index)
             self.__check_activation_shuffle_navigator()
-            self.change_card_index(new_card_index)
+            self.set_current_card_index(new_card_index)
 
     def __get_new_card_index_page_buttons(self, next_page_index: int) -> int:
         new_card_index: int
@@ -167,7 +167,7 @@ class CardNavigator:
         if self.__current_card_index <= 0:
             return
 
-        self.change_card_index(self.__current_card_index - 1)
+        self.set_current_card_index(self.__current_card_index - 1)
 
     def next_card(self) -> None:
         if self.__current_card_index >= self.__get_num_cards() - 1:
@@ -188,7 +188,7 @@ class CardNavigator:
                 self.__update_next_card_button_state()
                 return
 
-        self.change_card_index(self.__current_card_index + 1)
+        self.set_current_card_index(self.__current_card_index + 1)
 
     def __get_flashcard_label_text(self) -> str:
         return self.__pdf_window_model.get_flashcard_label_text()
@@ -203,7 +203,7 @@ class CardNavigator:
             new_card_index = self.__get_num_flashcard_to_card_index()[
                 index_flashcard_before
             ]
-            self.change_card_index(new_card_index)
+            self.set_current_card_index(new_card_index)
 
     def next_flashcard(self) -> None:
         new_card_index: int
@@ -212,7 +212,7 @@ class CardNavigator:
             new_card_index = self.__get_num_flashcard_to_card_index()[
                 next_flashcard_index
             ]
-            self.change_card_index(new_card_index)
+            self.set_current_card_index(new_card_index)
 
     def __get_index_flashcard_before(self) -> int:
         index_flashcard_before: int
@@ -229,7 +229,7 @@ class CardNavigator:
             ].get_flashcard_index_before()
         return index_flashcard_before
 
-    def change_card_index(self, new_index) -> None:
+    def set_current_card_index(self, new_index) -> None:
         if new_index < 0 or new_index >= self.__get_num_cards():
             raise ValueError("Error: card index out of range")
 
@@ -253,7 +253,7 @@ class CardNavigator:
             )
         ):
             self.__shuffle_pdf_navigator.set_is_page_navigator_active(False)
-            self.change_card_index(
+            self.set_current_card_index(
                 self.__shuffle_pdf_navigator.get_starting_pdf_page().get_card_index()
             )
         elif self.__shuffle_pdf_navigator.get_is_page_navigator_active() and isinstance(
