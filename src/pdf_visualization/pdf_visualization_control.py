@@ -70,14 +70,17 @@ class PDFWindowVisualizationControl:
         )
 
     def __set_controls_right_panel_widget(self) -> None:
-        self.__set_controls_add_flashcard_button_layout()
+        self.__set_controls_flashcard_button_layout()
 
-    def __set_controls_add_flashcard_button_layout(self) -> None:
+    def __set_controls_flashcard_button_layout(self) -> None:
         self.__pdf_window_layout.get_page_flashcard_button().clicked.connect(
             partial(self.__pdf_window_model.add_page_flashcard, flag_generic=False)
         )
         self.__pdf_window_layout.get_generic_flashcard_button().clicked.connect(
             partial(self.__pdf_window_model.add_page_flashcard, flag_generic=True)
+        )
+        self.__pdf_window_layout.get_remove_flashcard_button().clicked.connect(
+            self.__pdf_window_model.remove_current_flashcard
         )
 
     def __set_controls_bottom_widget(self) -> None:

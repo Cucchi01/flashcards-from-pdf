@@ -308,6 +308,9 @@ class PDFWindowVisualizationModel:
 
         self.__refresh_merged_cards(self.__is_deck_ordered)
 
+    def remove_current_flashcard(self) -> None:
+        pass
+
     def get_num_flashcards(self) -> int:
         return len(self.__num_flashcard_to_card_index)
 
