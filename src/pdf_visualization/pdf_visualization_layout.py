@@ -15,6 +15,7 @@ from PyQt6 import QtPdf, QtPdfWidgets
 from typing import Optional
 
 from application_constants import APPLICATION_NAME
+from pdf_visualization.q_label_custom import QLabelCustom
 
 
 class PDFWindowVisualizationLayout(QWidget):
@@ -35,7 +36,7 @@ class PDFWindowVisualizationLayout(QWidget):
         # main
         # left panel
         self.__left_panel_layout: QVBoxLayout
-        self.__flashcard_label: QLabel
+        self.__flashcard_label: QLabelCustom
         self.__pdf_view: QtPdfWidgets.QPdfView
         self.__pdf_doc: QtPdf.QPdfDocument
         self.__pdf_nav: QtPdf.QPdfPageNavigator
@@ -138,7 +139,7 @@ class PDFWindowVisualizationLayout(QWidget):
 
         self.__left_panel_layout = QVBoxLayout()
 
-        self.__flashcard_label = QLabel(main)
+        self.__flashcard_label = QLabelCustom(main)
         self.__flashcard_label.setVisible(False)
         self.__flashcard_label.setText("")
 
@@ -288,7 +289,7 @@ class PDFWindowVisualizationLayout(QWidget):
     def get_pdf_page_num_spinbox(self) -> QSpinBox:
         return self.__pdf_page_num_spinbox
 
-    def get_flashcard_label(self) -> QLabel:
+    def get_flashcard_label(self) -> QLabelCustom:
         return self.__flashcard_label
 
     def get_pdf_view(self) -> QtPdfWidgets.QPdfView:

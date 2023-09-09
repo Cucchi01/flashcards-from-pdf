@@ -1,9 +1,6 @@
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import (
-    QShortcut,
-    QKeySequence,
-)
+from PyQt6.QtGui import QShortcut, QKeySequence, QMouseEvent
 
 from functools import partial
 
@@ -67,6 +64,9 @@ class PDFWindowVisualizationControl:
         )
         self.shortcut_zoom_decrease.activated.connect(
             self.__pdf_window_layout.decrease_zoom
+        )
+        self.__pdf_window_layout.get_flashcard_label().set_method_to_call(
+            self.__pdf_window_model.modify_current_flashcard
         )
 
     def __set_controls_right_panel_widget(self) -> None:

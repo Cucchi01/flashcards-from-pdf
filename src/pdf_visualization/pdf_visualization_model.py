@@ -340,6 +340,9 @@ class PDFWindowVisualizationModel:
         else:
             self.__window_layout.get_remove_flashcard_button().setDisabled(True)
 
+    def modify_current_flashcard(self) -> None:
+        pass
+
     def get_num_flashcards(self) -> int:
         return len(self.__num_flashcard_to_card_index)
 
