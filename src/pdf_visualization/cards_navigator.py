@@ -273,6 +273,7 @@ class CardNavigator:
         self.__pdf_window_model.update_page_pos_layout()
         self.__update_previous_card_button_state()
         self.__update_next_card_button_state()
+        self.__update_remove_flashcard_button()
 
     def __update_previous_page_button_state(self) -> None:
         previous_page_index: int = self.__get_previous_page_index_previous_page_button()
@@ -431,6 +432,9 @@ class CardNavigator:
 
     def __update_card(self, event) -> None:
         self.__pdf_window_model.update_card(self.__current_card_index)
+
+    def __update_remove_flashcard_button(self)->None:
+        self.__pdf_window_model.update_remove_flashcard_button()
 
 
 # How the cards are created is strictly connected to how the navigator behave

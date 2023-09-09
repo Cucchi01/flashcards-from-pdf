@@ -254,7 +254,7 @@ class PDFWindowVisualizationModel:
         self.__cards_navigator.set_current_card_index(
             self.__cards_navigator.get_current_card_index() + 1
         )
-        self.save_flashcard_to_file()
+        self.save_flashcards_to_file()
         self.clear_input_fields()
 
         QApplication.restoreOverrideCursor()
@@ -309,7 +309,36 @@ class PDFWindowVisualizationModel:
         self.__refresh_merged_cards(self.__is_deck_ordered)
 
     def remove_current_flashcard(self) -> None:
-        pass
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        card: Card = self.__cards_to_display[
+            self.__cards_navigator.get_current_card_index()
+        ]
+        if isinstance(
+            card,
+            PdfPage,
+        ):
+            raise TypeError()
+
+        flashcard: Flashcard = card
+        self.__flashcards_from_pdf_page[flashcard.get_reference_page()].remove(
+            flashcard
+        )
+
+        self.__refresh_merged_cards(self.__is_deck_ordered)
+        self.save_flashcards_to_file()
+        self.__cards_navigator.set_current_card_index(
+            self.__cards_navigator.get_current_card_index()
+        )
+        QApplication.restoreOverrideCursor()
+
+    def update_remove_flashcard_button(self) -> None:
+        if isinstance(
+            self.__cards_to_display[self.__cards_navigator.get_current_card_index()],
+            Flashcard,
+        ):
+            self.__window_layout.get_remove_flashcard_button().setDisabled(False)
+        else:
+            self.__window_layout.get_remove_flashcard_button().setDisabled(True)
 
     def get_num_flashcards(self) -> int:
         return len(self.__num_flashcard_to_card_index)
@@ -352,7 +381,7 @@ class PDFWindowVisualizationModel:
         self.__window_layout.get_input_text_answer().setPlainText("")
         self.__window_layout.get_page_specific_checkbox().setChecked(True)
 
-    def save_flashcard_to_file(self) -> None:
+    def save_flashcards_to_file(self) -> None:
         IOFlashcards.save_flashcards_file(
             self.__path_of_pdf,
             self.__io_flashcards_info,
