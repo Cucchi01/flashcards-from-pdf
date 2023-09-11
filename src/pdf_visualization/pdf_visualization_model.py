@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QPushButton, QPlainTextEdit, QCheckBox
-from PyQt6.QtCore import  QPointF
+from PyQt6.QtCore import QPointF
 
 import os
 
@@ -101,14 +101,29 @@ class PDFWindowVisualizationModel:
     def get_input_text_question(self) -> QPlainTextEdit:
         return self.__window_layout.get_input_text_question()
 
+    def set_input_text_question(self, text: str) -> None:
+        return self.__window_layout.get_input_text_question().setPlainText(text)
+
     def get_input_text_answer(self) -> QPlainTextEdit:
         return self.__window_layout.get_input_text_answer()
+
+    def set_input_text_answer(self, text: str) -> None:
+        return self.__window_layout.get_input_text_answer().setPlainText(text)
+
+    def get_page_flashcard_button(self) -> QPushButton:
+        return self.__window_layout.get_page_flashcard_button()
+
+    def get_generic_flashcard_button(self) -> QPushButton:
+        return self.__window_layout.get_generic_flashcard_button()
 
     def get_page_specific_checkbox(self) -> QCheckBox:
         return self.__window_layout.get_page_specific_checkbox()
 
     def get_remove_flashcard_button(self) -> QPushButton:
         return self.__window_layout.get_remove_flashcard_button()
+
+    def get_cancel_modification_flashcard_button(self) -> QPushButton:
+        return self.__window_layout.get_cancel_modification_flashcard_button()
 
     def get_previous_flashcard_button(self) -> QPushButton:
         return self.__window_layout.get_previous_flashcard_button()
@@ -248,13 +263,25 @@ class PDFWindowVisualizationModel:
         return self.__window_layout
 
     def add_page_flashcard(self, flag_generic: bool = False) -> None:
-        self.__flashcard_manager.add_page_flashcard(flag_generic)
+        self.__flashcard_manager.manage_page_button_flashcard(flag_generic)
 
     def remove_current_flashcard(self) -> None:
         self.__flashcard_manager.remove_current_flashcard()
 
+    def cancel_current_flashcard_modification(self) -> None:
+        self.__flashcard_manager.cancel_current_flashcard_modification()
+
+    def update_add_flashcard_button(self) -> None:
+        self.__flashcard_manager.update_add_flashcard_button()
+
+    def update_add_generic_flashcard_button(self) -> None:
+        self.__flashcard_manager.update_add_generic_flashcard_button()
+
     def update_remove_flashcard_button(self) -> None:
         self.__flashcard_manager.update_remove_flashcard_button()
+
+    def update_cancel_modification_flashcard_button(self) -> None:
+        self.__flashcard_manager.update_cancel_modification_flashcard_button()
 
     def get_current_card_index(self) -> int:
         return self.__cards_navigator.get_current_card_index()

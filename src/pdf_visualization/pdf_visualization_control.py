@@ -82,6 +82,9 @@ class PDFWindowVisualizationControl:
         self.__pdf_window_layout.get_remove_flashcard_button().clicked.connect(
             self.__pdf_window_model.remove_current_flashcard
         )
+        self.__pdf_window_layout.get_cancel_modification_flashcard_button().clicked.connect(
+            self.__pdf_window_model.cancel_current_flashcard_modification
+        )
 
     def __set_controls_bottom_widget(self) -> None:
         # bottom

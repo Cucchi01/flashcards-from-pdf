@@ -48,6 +48,7 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__add_page_flashcard_button: QPushButton
         self.__add_generic_flashcard_button: QPushButton
         self.__remove_flashcard_button: QPushButton
+        self.__cancel_modification_flashcard_button: QPushButton
 
         # bottom
         self.__previous_flashcard_button: QPushButton
@@ -191,10 +192,15 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__add_generic_flashcard_button.setText("Add generic flashcard")
         self.__remove_flashcard_button = QPushButton()
         self.__remove_flashcard_button.setText("Remove current flashcard")
+        self.__cancel_modification_flashcard_button = QPushButton()
+        self.__cancel_modification_flashcard_button.setText(
+            "Cancel current flashcard modification"
+        )
 
         layout.addWidget(self.__add_page_flashcard_button)
         layout.addWidget(self.__add_generic_flashcard_button)
         layout.addWidget(self.__remove_flashcard_button)
+        layout.addWidget(self.__cancel_modification_flashcard_button)
 
     def __set_bottom_widget(self) -> QWidget:
         # bottom
@@ -336,3 +342,6 @@ class PDFWindowVisualizationLayout(QWidget):
 
     def get_remove_flashcard_button(self) -> QPushButton:
         return self.__remove_flashcard_button
+
+    def get_cancel_modification_flashcard_button(self) -> QPushButton:
+        return self.__cancel_modification_flashcard_button

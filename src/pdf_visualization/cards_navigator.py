@@ -17,14 +17,12 @@ from flashcard.pdf_page import PdfPage
 from flashcard.card import Card
 from IO_flashcards_management import IOFlashcards
 from test_management.pdf_test_info import PDFTestsInfo
+from pdf_visualization.right_panel_manager import RightPanelManager
 
 
 class CardNavigator:
     def __init__(self, pdf_window_model: "PDFWindowVisualizationModel") -> None:
         self.__pdf_window_model: "PDFWindowVisualizationModel" = pdf_window_model
-        self.__flashcards_from_pdf_page: dict[
-            int, list[Flashcard]
-        ] = self.__pdf_window_model.get_flashcards_from_pdf_page()
 
         self.__current_card_index: int = 0
         self.__is_page_spinbox_event_disabled: bool = False
@@ -273,7 +271,10 @@ class CardNavigator:
         self.__pdf_window_model.update_page_pos_layout()
         self.__update_previous_card_button_state()
         self.__update_next_card_button_state()
+        self.__update_add_flashcard_button()
+        self.__update_add_generic_flashcard_button()
         self.__update_remove_flashcard_button()
+        self.__update_cancel_modification_flashcard_button()
 
     def __update_previous_page_button_state(self) -> None:
         previous_page_index: int = self.__get_previous_page_index_previous_page_button()
@@ -433,13 +434,20 @@ class CardNavigator:
     def __update_card(self, event) -> None:
         self.__pdf_window_model.update_card(self.__current_card_index)
 
-    def __update_remove_flashcard_button(self)->None:
+    def __update_add_flashcard_button(self) -> None:
+        self.__pdf_window_model.update_add_flashcard_button()
+
+    def __update_add_generic_flashcard_button(self) -> None:
+        self.__pdf_window_model.update_add_generic_flashcard_button()
+
+    def __update_remove_flashcard_button(self) -> None:
         self.__pdf_window_model.update_remove_flashcard_button()
+
+    def __update_cancel_modification_flashcard_button(self) -> None:
+        self.__pdf_window_model.update_cancel_modification_flashcard_button()
 
 
 # How the cards are created is strictly connected to how the navigator behave
-
-
 def merge_cards_ordered(
     flashcards_per_page: dict[int, list[Flashcard]], num_pdf_pages: int
 ) -> tuple[list[Card], list[int], list[int]]:

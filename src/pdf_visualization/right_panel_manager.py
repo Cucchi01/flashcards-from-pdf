@@ -7,9 +7,7 @@ from typing import TYPE_CHECKING
 # always false at running time. It is used for mypy typing check and avoiding circular imports
 if TYPE_CHECKING:
     from pdf_visualization.pdf_visualization_model import PDFWindowVisualizationModel
-from pdf_visualization.cards_navigator import (
-    CardNavigator,
-)
+    from pdf_visualization.cards_navigator import CardNavigator
 from flashcard.flashcard import Flashcard
 from flashcard.pdf_page import PdfPage
 from flashcard.card import Card
@@ -20,10 +18,67 @@ class RightPanelManager:
         self.__pdf_visualization_model: "PDFWindowVisualizationModel" = (
             pdf_visualization_model
         )
+        self.__is_flashcard_being_modified = False
+        self.__current_modified_flashcard: Flashcard
 
-    def add_page_flashcard(self, flag_generic: bool = False) -> None:
+    def manage_page_button_flashcard(self, flag_generic: bool = False) -> None:
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        if self.__is_flashcard_being_modified:
+            self.__modify_flashcard(flag_generic)
+            self.__is_flashcard_being_modified = False
+        else:
+            self.__add_page_flashcard(flag_generic)
 
+        self.__pdf_visualization_model.save_flashcards_to_file()
+        self.clear_input_fields()
+        QApplication.restoreOverrideCursor()
+
+    def __modify_flashcard(self, flag_generic: bool) -> None:
+        flashcard: Flashcard = self.__current_modified_flashcard
+        flashcard.set_question(
+            self.__pdf_visualization_model.get_input_text_question().toPlainText()
+        )
+        flashcard.set_answer(
+            self.__pdf_visualization_model.get_input_text_answer().toPlainText()
+        )
+
+        # remove flashcard from old position
+        self.__get_flashcards_from_pdf_page()[flashcard.get_reference_page()].remove(
+            flashcard
+        )
+
+        if flag_generic:
+            flashcard.set_reference_page(Flashcard.GENERIC_PAGE)
+            flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
+        else:
+            self.__set_page_specific_field(flashcard)
+            flashcard.set_reference_page(
+                self.__pdf_visualization_model.get_current_page_index()
+            )
+
+        # add flashcard in the new position
+        index_in_list: int = self.__get_index_list_position()
+        self.__add_flashcard_at_index(flashcard, index_in_list)
+
+        self.__pdf_visualization_model.refresh_merged_cards(
+            self.__get_is_deck_ordered()
+        )
+
+        self.__reset_card_before_modification(flashcard)
+
+    def __get_flashcard_index(self, flashcard_to_search: Flashcard) -> int:
+        i: int = 0
+        list_flashcards: list[Flashcard]
+        for _, list_flashcards in sorted(
+            self.__get_flashcards_from_pdf_page().items(), key=lambda x: x[0]
+        ):
+            for flashcard in list_flashcards:
+                if flashcard == flashcard_to_search:
+                    return i
+                i += 1
+        return -1
+
+    def __add_page_flashcard(self, flag_generic: bool = False) -> None:
         app: Optional[Flashcard] = self.__get_new_flashcard()
         if app is None:
             return
@@ -40,10 +95,6 @@ class RightPanelManager:
         self.__get_cards_navigator().set_current_card_index(
             self.__get_current_card_index() + 1
         )
-        self.__pdf_visualization_model.save_flashcards_to_file()
-        self.clear_input_fields()
-
-        QApplication.restoreOverrideCursor()
 
     def __get_new_flashcard(self) -> Optional[Flashcard]:
         flashcard: Flashcard = Flashcard()
@@ -63,12 +114,15 @@ class RightPanelManager:
         flashcard.set_question(question_text)
         answer_text: str = self.__get_input_text_answer().toPlainText().strip()
         flashcard.set_answer(answer_text)
+        self.__set_page_specific_field(flashcard)
+
+        return flashcard
+
+    def __set_page_specific_field(self, flashcard: Flashcard) -> None:
         if self.__get_page_specific_checkbox().isChecked():
             flashcard.set_question_type(Flashcard.QuestionType.PAGE_SPECIFIC)
         else:
             flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
-
-        return flashcard
 
     def clear_input_fields(self) -> None:
         self.__get_input_text_question().setPlainText("")
@@ -102,10 +156,11 @@ class RightPanelManager:
         if flashcards_current_page is None:
             raise ValueError("Not expected value")
         i: int = 0
-        while flashcards_current_page[i] != current_flashcard:
+        while (
+            i < len(flashcards_current_page)
+            and flashcards_current_page[i] != current_flashcard
+        ):
             i += 1
-            if i >= len(flashcards_current_page):
-                raise ValueError("Not expected value")
 
         return i
 
@@ -166,11 +221,29 @@ class RightPanelManager:
         )
         QApplication.restoreOverrideCursor()
 
-    def __get_cards_navigator(self) -> CardNavigator:
+    def __get_cards_navigator(self) -> "CardNavigator":
         return self.__pdf_visualization_model.get_cards_navigator()
 
     def __get_is_deck_ordered(self) -> bool:
         return self.__pdf_visualization_model.get_is_deck_ordered()
+
+    def update_add_flashcard_button(self) -> None:
+        if self.get_is_flashcard_being_modified() == True:
+            self.__get_page_flashcard_button().setText("Modify flashcard")
+        else:
+            self.__get_page_flashcard_button().setText("Add flashcard")
+
+    def __get_page_flashcard_button(self) -> QPushButton:
+        return self.__pdf_visualization_model.get_page_flashcard_button()
+
+    def update_add_generic_flashcard_button(self) -> None:
+        if self.get_is_flashcard_being_modified() == True:
+            self.__get_generic_flashcard_button().setText("Modify generic flashcard")
+        else:
+            self.__get_generic_flashcard_button().setText("Add generic flashcard")
+
+    def __get_generic_flashcard_button(self) -> QPushButton:
+        return self.__pdf_visualization_model.get_generic_flashcard_button()
 
     def update_remove_flashcard_button(self) -> None:
         if isinstance(
@@ -180,6 +253,15 @@ class RightPanelManager:
             self.__get_remove_flashcard_button().setDisabled(False)
         else:
             self.__get_remove_flashcard_button().setDisabled(True)
+
+    def update_cancel_modification_flashcard_button(self) -> None:
+        if self.get_is_flashcard_being_modified() == True:
+            self.__get_cancel_modification_flashcard_button().setEnabled(True)
+        else:
+            self.__get_cancel_modification_flashcard_button().setEnabled(False)
+
+    def __get_cancel_modification_flashcard_button(self) -> QPushButton:
+        return self.__pdf_visualization_model.get_cancel_modification_flashcard_button()
 
     def __get_cards_to_display(self) -> list[Card]:
         return self.__pdf_visualization_model.get_cards_to_display()
@@ -191,7 +273,63 @@ class RightPanelManager:
         return self.__pdf_visualization_model.get_remove_flashcard_button()
 
     def modify_current_flashcard(self) -> None:
-        pass
+        flashcard: Flashcard = self.__get_cards_to_display()[
+            self.__get_current_card_index()
+        ]
+        self.__set_right_panel_flashcard(flashcard)
+        self.__is_flashcard_being_modified = True
+        self.__current_modified_flashcard = flashcard
+        reference_page_card_index: int = self.__get_reference_page_card_index(flashcard)
+        self.__get_cards_navigator().set_current_card_index(reference_page_card_index)
+
+    def __get_reference_page_card_index(self, flashcard: Flashcard) -> int:
+        reference_page_card_index: int
+        if flashcard.get_reference_page() == Flashcard.GENERIC_PAGE:
+            reference_page_card_index = self.get_num_pdf_page_to_card_index()[0]
+        else:
+            reference_page_card_index = self.get_num_pdf_page_to_card_index()[
+                flashcard.get_reference_page()
+            ]
+        return reference_page_card_index
+
+    def __set_right_panel_flashcard(self, flashcard: Flashcard) -> None:
+        flashcard.set_reference_page(flashcard.get_reference_page())
+        self.__set_input_text_question(flashcard.get_question())
+        self.__set_input_text_answer(flashcard.get_answer())
+
+        if flashcard.get_question_type() == Flashcard.QuestionType.GENERIC:
+            self.__get_page_specific_checkbox().setChecked(False)
+        else:
+            self.__get_page_specific_checkbox().setChecked(True)
+
+    def get_num_pdf_page_to_card_index(self) -> list[int]:
+        return self.__pdf_visualization_model.get_num_pdf_page_to_card_index()
+
+    def get_num_flashcard_to_card_index(self) -> list[int]:
+        return self.__pdf_visualization_model.get_num_flashcard_to_card_index()
+
+    def __set_input_text_question(self, string: str) -> None:
+        return self.__pdf_visualization_model.set_input_text_question(string)
+
+    def __set_input_text_answer(self, string: str) -> None:
+        return self.__pdf_visualization_model.set_input_text_answer(string)
 
     def __get_flashcards_from_pdf_page(self) -> dict[int, list[Flashcard]]:
         return self.__pdf_visualization_model.get_flashcards_from_pdf_page()
+
+    def get_is_flashcard_being_modified(self) -> bool:
+        return self.__is_flashcard_being_modified
+
+    def cancel_current_flashcard_modification(self) -> None:
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        self.__is_flashcard_being_modified = False
+        self.__reset_card_before_modification(self.__current_modified_flashcard)
+        self.clear_input_fields()
+        QApplication.restoreOverrideCursor()
+
+    def __reset_card_before_modification(self, flashcard: Flashcard) -> None:
+        flashcard_index: int = self.__get_flashcard_index(flashcard)
+        # riposition on the flashcard
+        self.__get_cards_navigator().set_current_card_index(
+            self.get_num_flashcard_to_card_index()[flashcard_index]
+        )
