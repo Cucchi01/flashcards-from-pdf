@@ -1,10 +1,7 @@
-from PyQt6.QtWidgets import QApplication, QPushButton
-from PyQt6.QtCore import Qt, QPointF
-from PyQt6 import QtPdf, QtPdfWidgets
+from PyQt6.QtWidgets import QPushButton, QPlainTextEdit, QCheckBox
+from PyQt6.QtCore import  QPointF
 
 import os
-from typing import Optional
-from random import shuffle
 
 from pdf_visualization.pdf_visualization_layout import PDFWindowVisualizationLayout
 from pdf_visualization.cards_navigator import (
@@ -12,6 +9,7 @@ from pdf_visualization.cards_navigator import (
     merge_cards_shuffle,
     merge_cards_ordered,
 )
+from pdf_visualization.right_panel_manager import RightPanelManager
 from flashcard.flashcard import Flashcard
 from flashcard.pdf_page import PdfPage
 from flashcard.card import Card
@@ -55,6 +53,7 @@ class PDFWindowVisualizationModel:
         self.__is_deck_ordered: bool = True
 
         self.__cards_navigator: CardNavigator = CardNavigator(self)
+        self.__flashcard_manager: RightPanelManager = RightPanelManager(self)
 
         self.__window_layout: PDFWindowVisualizationLayout = (
             PDFWindowVisualizationLayout(self.__filename, self.__num_pdf_pages)
@@ -81,17 +80,35 @@ class PDFWindowVisualizationModel:
     def get_num_cards(self) -> int:
         return len(self.__cards_to_display)
 
-    def get_flashcard_label_text(self) -> str:
-        return self.__window_layout.get_flashcard_label().text()
+    def get_is_deck_ordered(self) -> bool:
+        return self.__is_deck_ordered
 
-    def set_flashcard_label_text(self, new_string: str) -> str:
-        return self.__window_layout.get_flashcard_label().setText(new_string)
+    def get_cards_navigator(self) -> CardNavigator:
+        return self.__cards_navigator
 
     def get_previous_page_button(self) -> QPushButton:
         return self.__window_layout.get_previous_page_button()
 
     def get_next_page_button(self) -> QPushButton:
         return self.__window_layout.get_next_page_button()
+
+    def get_flashcard_label_text(self) -> str:
+        return self.__window_layout.get_flashcard_label().text()
+
+    def set_flashcard_label_text(self, new_string: str) -> str:
+        return self.__window_layout.get_flashcard_label().setText(new_string)
+
+    def get_input_text_question(self) -> QPlainTextEdit:
+        return self.__window_layout.get_input_text_question()
+
+    def get_input_text_answer(self) -> QPlainTextEdit:
+        return self.__window_layout.get_input_text_answer()
+
+    def get_page_specific_checkbox(self) -> QCheckBox:
+        return self.__window_layout.get_page_specific_checkbox()
+
+    def get_remove_flashcard_button(self) -> QPushButton:
+        return self.__window_layout.get_remove_flashcard_button()
 
     def get_previous_flashcard_button(self) -> QPushButton:
         return self.__window_layout.get_previous_flashcard_button()
@@ -105,17 +122,12 @@ class PDFWindowVisualizationModel:
     def get_next_card_button(self) -> QPushButton:
         return self.__window_layout.get_next_card_button()
 
-    def get_is_deck_ordered(self) -> bool:
-        return self.__is_deck_ordered
-
     def __setup_window_layout(self) -> None:
         self.__setup_left_panel()
         self.__setup_bottom_widget()
 
     def get_current_page_index(self) -> int:
-        return self.__cards_to_display[
-            self.__cards_navigator.get_current_card_index()
-        ].get_pdf_page()
+        return self.__cards_to_display[self.get_current_card_index()].get_pdf_page()
 
     def shuffle_button_pressed(self) -> None:
         self.refresh_page(not self.__is_deck_ordered)
@@ -131,16 +143,16 @@ class PDFWindowVisualizationModel:
             self.__window_layout.get_pdf_page_num_spinbox().setDisabled(True)
 
     def __reorder_cards(self) -> None:
-        self.__refresh_merged_cards(ordered_deck=True)
+        self.refresh_merged_cards(ordered_deck=True)
         self.__is_deck_ordered = True
         self.__cards_navigator.restart_visualization()
 
     def __shuffle_cards(self) -> None:
-        self.__refresh_merged_cards(ordered_deck=False)
+        self.refresh_merged_cards(ordered_deck=False)
         self.__is_deck_ordered = False
         self.__cards_navigator.restart_visualization()
 
-    def __refresh_merged_cards(self, ordered_deck: bool) -> None:
+    def refresh_merged_cards(self, ordered_deck: bool) -> None:
         if ordered_deck:
             (
                 self.__cards_to_display,
@@ -178,9 +190,8 @@ class PDFWindowVisualizationModel:
         self.__cards_navigator.next_page()
 
     def __setup_left_panel(self) -> None:
-        # TODO: add the management of the flashcards
         self.__load_pdf_doc(self.__path_of_pdf)
-        self.update_card(self.__cards_navigator.get_current_card_index())
+        self.update_card(self.get_current_card_index())
 
     def __load_pdf_doc(self, path_of_pdf: str) -> None:
         self.__window_layout.get_pdf_doc().load(path_of_pdf)
@@ -206,7 +217,7 @@ class PDFWindowVisualizationModel:
 
     def update_page_pos_layout(self) -> None:
         page_index: int = self.__cards_to_display[
-            self.__cards_navigator.get_current_card_index()
+            self.get_current_card_index()
         ].get_pdf_page_for_visualization()
 
         self.__is_page_spinbox_event_disabled = True
@@ -237,152 +248,19 @@ class PDFWindowVisualizationModel:
         return self.__window_layout
 
     def add_page_flashcard(self, flag_generic: bool = False) -> None:
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-
-        app: Optional[Flashcard] = self.get_new_flashcard()
-        if app is None:
-            return
-        flashcard: Flashcard = app
-
-        if flag_generic:
-            flashcard.set_reference_page(Flashcard.GENERIC_PAGE)
-            flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
-
-        index_in_list: int = self.__get_index_list_position()
-
-        self.__add_flashcard_at_index(flashcard, index_in_list)
-        self.__cards_navigator.set_current_card_index(
-            self.__cards_navigator.get_current_card_index() + 1
-        )
-        self.save_flashcards_to_file()
-        self.clear_input_fields()
-
-        QApplication.restoreOverrideCursor()
-
-    def __get_index_list_position(self) -> int:
-        current_card: Card = self.__cards_to_display[
-            self.__cards_navigator.get_current_card_index()
-        ]
-        flashcards_current_page: Optional[
-            list[Flashcard]
-        ] = self.__flashcards_from_pdf_page.get(current_card.get_pdf_page())
-        current_flashcard: Flashcard
-        if isinstance(current_card, Flashcard):
-            current_flashcard = current_card
-        else:
-            if flashcards_current_page is None:
-                return 0
-            return len(flashcards_current_page)
-
-        if flashcards_current_page is None:
-            raise ValueError("Not expected value")
-        i: int = 0
-        while flashcards_current_page[i] != current_flashcard:
-            i += 1
-            if i >= len(flashcards_current_page):
-                raise ValueError("Not expected value")
-
-        return i
-
-    def __add_flashcard(self, flashcard: Flashcard):
-        if flashcard.get_reference_page() in self.__flashcards_from_pdf_page.keys():
-            self.__flashcards_from_pdf_page[flashcard.get_reference_page()].append(
-                flashcard
-            )
-        else:
-            self.__flashcards_from_pdf_page[flashcard.get_reference_page()] = [
-                flashcard
-            ]
-
-        self.__refresh_merged_cards(self.__is_deck_ordered)
-
-    def __add_flashcard_at_index(self, flashcard: Flashcard, index_in_list):
-        if flashcard.get_reference_page() in self.__flashcards_from_pdf_page.keys():
-            self.__flashcards_from_pdf_page[flashcard.get_reference_page()].insert(
-                index_in_list, flashcard
-            )
-        else:
-            self.__flashcards_from_pdf_page[flashcard.get_reference_page()] = [
-                flashcard
-            ]
-
-        self.__refresh_merged_cards(self.__is_deck_ordered)
+        self.__flashcard_manager.add_page_flashcard(flag_generic)
 
     def remove_current_flashcard(self) -> None:
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        card: Card = self.__cards_to_display[
-            self.__cards_navigator.get_current_card_index()
-        ]
-        if isinstance(
-            card,
-            PdfPage,
-        ):
-            raise TypeError()
-
-        flashcard: Flashcard = card
-        self.__flashcards_from_pdf_page[flashcard.get_reference_page()].remove(
-            flashcard
-        )
-
-        self.__refresh_merged_cards(self.__is_deck_ordered)
-        self.save_flashcards_to_file()
-        self.__cards_navigator.set_current_card_index(
-            self.__cards_navigator.get_current_card_index()
-        )
-        QApplication.restoreOverrideCursor()
+        self.__flashcard_manager.remove_current_flashcard()
 
     def update_remove_flashcard_button(self) -> None:
-        if isinstance(
-            self.__cards_to_display[self.__cards_navigator.get_current_card_index()],
-            Flashcard,
-        ):
-            self.__window_layout.get_remove_flashcard_button().setDisabled(False)
-        else:
-            self.__window_layout.get_remove_flashcard_button().setDisabled(True)
+        self.__flashcard_manager.update_remove_flashcard_button()
+
+    def get_current_card_index(self) -> int:
+        return self.__cards_navigator.get_current_card_index()
 
     def modify_current_flashcard(self) -> None:
-        pass
-
-    def get_num_flashcards(self) -> int:
-        return len(self.__num_flashcard_to_card_index)
-
-    def get_new_flashcard(self) -> Optional[Flashcard]:
-        flashcard: Flashcard = Flashcard()
-
-        flashcard.set_reference_page(self.get_current_page_index())
-
-        question_text: str = (
-            self.__window_layout.get_input_text_question().toPlainText().strip()
-        )
-        if question_text == "":
-            self.__window_layout.get_input_text_question().setStyleSheet(
-                "border: 1px solid red;"
-            )
-            self.__window_layout.get_input_text_question().setFocus(
-                Qt.FocusReason.OtherFocusReason
-            )
-            return None
-        else:
-            self.__window_layout.get_input_text_question().setStyleSheet(
-                "border: 1px solid black;"
-            )
-
-        flashcard.set_question(question_text)
-        answer_text: str = (
-            self.__window_layout.get_input_text_answer().toPlainText().strip()
-        )
-        flashcard.set_answer(answer_text)
-        if self.__window_layout.get_page_specific_checkbox().isChecked():
-            flashcard.set_question_type(Flashcard.QuestionType.PAGE_SPECIFIC)
-        else:
-            flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
-
-        return flashcard
-
-    def clear_input_fields(self) -> None:
-        self.__window_layout.get_input_text_question().setPlainText("")
-        self.__window_layout.get_input_text_answer().setPlainText("")
-        self.__window_layout.get_page_specific_checkbox().setChecked(True)
+        self.__flashcard_manager.modify_current_flashcard()
 
     def save_flashcards_to_file(self) -> None:
         IOFlashcards.save_flashcards_file(
@@ -391,3 +269,6 @@ class PDFWindowVisualizationModel:
             self.get_num_flashcards(),
             self.__flashcards_from_pdf_page,
         )
+
+    def get_num_flashcards(self) -> int:
+        return len(self.__num_flashcard_to_card_index)
