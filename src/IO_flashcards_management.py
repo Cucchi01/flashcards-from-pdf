@@ -52,7 +52,13 @@ class IOFlashcards:
             num_flashcards: int = int(file.readline())
             pages_with_flashcards: set[int] = set()
             quest: Flashcard = Flashcard()
-            for line in file:
+            line: str = ""
+            for next_line in file:
+                line += next_line
+                # a field can have a \n and has to be manged
+                if line.count(FILE_FLASHCARDS_SEPARATOR) != 6:
+                    continue
+
                 quest = Flashcard()
                 num_col = -1
                 for word in line.split(FILE_FLASHCARDS_SEPARATOR):
@@ -61,6 +67,8 @@ class IOFlashcards:
                     IOFlashcards.__manage_flashcard_field(
                         num_col, word, quest, ongoing_test
                     )
+
+                line = ""
 
                 # Adding flashcard
                 num_page: int = quest.get_pdf_page()
