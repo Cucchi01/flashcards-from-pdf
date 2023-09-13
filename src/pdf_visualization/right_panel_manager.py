@@ -51,10 +51,10 @@ class RightPanelManager:
             flashcard.set_reference_page(Flashcard.GENERIC_PAGE)
             flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
         else:
-            self.__set_page_specific_field(flashcard)
             flashcard.set_reference_page(
                 self.__pdf_visualization_model.get_current_page_index()
             )
+            self.__set_page_specific_field(flashcard)
 
         # add flashcard in the new position
         index_in_list: int = self.__get_index_list_position()
@@ -119,7 +119,10 @@ class RightPanelManager:
         return flashcard
 
     def __set_page_specific_field(self, flashcard: Flashcard) -> None:
-        if self.__get_page_specific_checkbox().isChecked():
+        if (
+            self.__get_page_specific_checkbox().isChecked()
+            and flashcard.get_reference_page() != Flashcard.GENERIC_PAGE
+        ):
             flashcard.set_question_type(Flashcard.QuestionType.PAGE_SPECIFIC)
         else:
             flashcard.set_question_type(Flashcard.QuestionType.GENERIC)
