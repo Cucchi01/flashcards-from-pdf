@@ -39,6 +39,8 @@ class IOFlashcards:
     @staticmethod
     def get_flashcards_from_txt(path_of_file: str) -> dict[int, list[Flashcard]]:
         flashcards: dict[int, list[Flashcard]] = dict()
+        if os.path.exists(path_of_file) == False:
+            return flashcards
         with open(path_of_file, "r", encoding="utf-8") as file:
             IOFlashcards.__skip_history_tests(file)
 

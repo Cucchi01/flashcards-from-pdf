@@ -41,7 +41,7 @@ class DecksStructure(QTreeWidget):
         )
         self.pdf_window_control: PDFWindowVisualizationControl
         self.menu_right_click: QMenu
-        self.path_pdf_to_update: str
+        self.path_to_update: str
 
     def __create_tree(self) -> None:
         self.__set_style_tree()
@@ -137,19 +137,34 @@ class DecksStructure(QTreeWidget):
 
         if self.__is_valid_click(selected_items):
             full_path = self.__get_entry_full_path(selected_items[0])
-            self.path_pdf_to_update = full_path
+            self.path_to_update = full_path
             self.menu_right_click.popup(QCursor.pos())
 
     def __is_valid_click(self, selected_items: list[QTreeWidgetItem]) -> bool:
         return len(selected_items) > 0
 
     def __update_pdf(self, event) -> None:
-        update_pdf(self.path_pdf_to_update)
+        update_pdf(self.path_to_update)
 
     def __export_to_anki(self, event) -> None:
+        _, ext = os.path.splitext(self.path_to_update)
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        IOFlashcards.save_flashcards_to_anki(self.path_pdf_to_update)
+        if ext == ".pdf":
+            IOFlashcards.save_flashcards_to_anki(self.path_to_update)
+        elif ext == "":
+            self.__export_directory_to_anki(self.path_to_update)
+
         QApplication.restoreOverrideCursor()
+
+    def __export_directory_to_anki(self, path_dir_to_update: str) -> None:
+        dirpath: str
+        dirnames: list[str]
+        filenames: list[str]
+        filename: str
+        for dirpath, dirnames, filenames in os.walk(path_dir_to_update):
+            for filename in filenames:
+                full_path = os.path.join(dirpath, filename)
+                IOFlashcards.save_flashcards_to_anki(full_path)
 
     def __on_entry_double_clicked(
         self, entry_pressed: QTreeWidgetItem, col_pressed: int
