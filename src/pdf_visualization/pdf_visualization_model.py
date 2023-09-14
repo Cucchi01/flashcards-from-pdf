@@ -10,6 +10,9 @@ from pdf_visualization.cards_navigator import (
     merge_cards_ordered,
 )
 from pdf_visualization.right_panel_manager import RightPanelManager
+from pdf_visualization.advanced_widget_layout import AdvancedOptionsLayout
+from pdf_visualization.advanced_widget_model import AdvancedOptionsModel
+from pdf_visualization.advanced_widget_control import AdvancedOptionsControl
 from flashcard.flashcard import Flashcard
 from flashcard.pdf_page import PdfPage
 from flashcard.card import Card
@@ -59,8 +62,12 @@ class PDFWindowVisualizationModel:
             PDFWindowVisualizationLayout(self.__filename, self.__num_pdf_pages)
         )
 
+        self.__advanced_controls_widget_layout: AdvancedOptionsLayout
+        self.__advanced_controls_widget_control: AdvancedOptionsControl
+        self.__advanced_controls_widget_model: AdvancedOptionsModel
+
         self.__setup_window_layout()
-        self.__cards_navigator.set_current_card_index(0)
+        self.set_current_card_index(0)
 
     def get_flashcards_from_pdf_page(self) -> dict[int, list[Flashcard]]:
         return self.__flashcards_from_pdf_page
@@ -157,6 +164,8 @@ class PDFWindowVisualizationModel:
             self.__window_layout.get_shuffle_button().setText("Order")
             self.__window_layout.get_pdf_page_num_spinbox().setDisabled(True)
 
+        self.__update_advanced_options()
+
     def __reorder_cards(self) -> None:
         self.refresh_merged_cards(ordered_deck=True)
         self.__is_deck_ordered = True
@@ -191,12 +200,33 @@ class PDFWindowVisualizationModel:
             if new_page_num < 0 or new_page_num >= self.__num_pdf_pages:
                 raise ValueError("Page value not valid")
 
-            self.__cards_navigator.set_current_card_index(
-                self.__num_pdf_page_to_card_index[new_page_num]
-            )
+            self.set_current_card_index(self.__num_pdf_page_to_card_index[new_page_num])
 
     def get_pdf_page_from_spinbox(self) -> int:
         return self.__window_layout.get_pdf_page_num_spinbox().value() - 1
+
+    def __update_advanced_options(self) -> None:
+        if self.get_is_deck_ordered():
+            self.__window_layout.get_advanced_options_button().setEnabled(True)
+        else:
+            self.__window_layout.get_advanced_options_button().setEnabled(False)
+            self.__advanced_controls_widget_layout = None
+            self.__advanced_controls_widget_control = None
+            self.__advanced_controls_widget_model = None
+
+    def advanced_options_button_pressed(self) -> None:
+        if self.get_is_deck_ordered() == False:
+            raise ValueError()
+
+        self.__advanced_controls_widget_layout = AdvancedOptionsLayout()
+        self.__advanced_controls_widget_model = AdvancedOptionsModel(
+            self.__advanced_controls_widget_layout, self
+        )
+        self.__advanced_controls_widget_control = AdvancedOptionsControl(
+            self.__advanced_controls_widget_layout,
+            self.__advanced_controls_widget_model,
+        )
+        self.__advanced_controls_widget_layout.show()
 
     def previous_page(self) -> None:
         self.__cards_navigator.previous_page()
@@ -299,3 +329,6 @@ class PDFWindowVisualizationModel:
 
     def get_num_flashcards(self) -> int:
         return len(self.__num_flashcard_to_card_index)
+
+    def set_current_card_index(self, new_card_index: int) -> None:
+        self.__cards_navigator.set_current_card_index(new_card_index)

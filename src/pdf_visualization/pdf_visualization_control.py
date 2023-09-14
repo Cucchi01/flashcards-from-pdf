@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QShortcut, QKeySequence, QMouseEvent
+from PyQt6.QtGui import QShortcut, QKeySequence
 
 from functools import partial
 
@@ -36,6 +36,10 @@ class PDFWindowVisualizationControl:
         # header
         self.__pdf_window_layout.get_shuffle_button().clicked.connect(
             self.__pdf_window_model.shuffle_button_pressed
+        )
+
+        self.__pdf_window_layout.get_advanced_options_button().clicked.connect(
+            self.__pdf_window_model.advanced_options_button_pressed
         )
 
         self.__set_controls_page_position_layout()

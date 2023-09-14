@@ -124,7 +124,6 @@ class PDFWindowVisualizationLayout(QWidget):
 
         self.__advanced_options_button = QPushButton()
         self.__advanced_options_button.setText("Advanced options")
-        self.__advanced_options_button.setDisabled(True)
 
         layout.addWidget(self.__previous_page_button)
         layout.addWidget(self.__next_page_button)
@@ -294,6 +293,9 @@ class PDFWindowVisualizationLayout(QWidget):
 
     def get_pdf_page_num_spinbox(self) -> QSpinBox:
         return self.__pdf_page_num_spinbox
+
+    def get_advanced_options_button(self) -> QPushButton:
+        return self.__advanced_options_button
 
     def get_flashcard_label(self) -> QLabelCustom:
         return self.__flashcard_label
