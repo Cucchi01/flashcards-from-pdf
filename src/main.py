@@ -29,6 +29,9 @@ import sys
 class MainWindow(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.__decks_page: QWidget
+        self.__tree: DecksStructure
+        self.__reload_tree_structure_button: QPushButton
 
         self.__set_window_style()
         self.__set_window_layout()
@@ -39,10 +42,10 @@ class MainWindow(QWidget):
         self.resize(BASE_HOME_WIDTH, BASE_HOME_HEIGHT)
 
     def __set_window_layout(self):
-        main_layout = QGridLayout(self)
+        main_layout = QVBoxLayout(self)
         self.setLayout(main_layout)
         tab = self.__get_tab_widget()
-        main_layout.addWidget(tab, 0, 0, 2, 1)
+        main_layout.addWidget(tab)
 
     def __get_tab_widget(self) -> QTabWidget:
         tab = QTabWidget(self)
@@ -57,13 +60,25 @@ class MainWindow(QWidget):
 
     def __get_tab_decks(self) -> QWidget:
         # decks page
-        decks_page = QWidget(self)
+        self.__decks_page = QWidget(self)
         layout = QVBoxLayout()
-        tree = DecksStructure(decks_page, PATH_TO_DECKS_ABS)
-        tree.show()
-        layout.addWidget(tree)
-        decks_page.setLayout(layout)
-        return decks_page
+
+        self.__reload_tree_structure_button = QPushButton("Reload tree structure")
+        self.__reload_tree_structure_button.clicked.connect(
+            self.__reload_tree_structure
+        )
+        self.__reload_tree_structure_button.setStyleSheet("background-color: #F5F5F5")
+
+        self.__tree = DecksStructure(self.__decks_page, PATH_TO_DECKS_ABS)
+        self.__tree.show()
+
+        layout.addWidget(self.__reload_tree_structure_button)
+        layout.addWidget(self.__tree)
+        self.__decks_page.setLayout(layout)
+        return self.__decks_page
+
+    def __reload_tree_structure(self) -> None:
+        self.__tree.create_top_level_tree()
 
     def __get_tab_stats(self) -> QWidget:
         # statistics page

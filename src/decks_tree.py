@@ -34,32 +34,33 @@ class DecksStructure(QTreeWidget):
         self.itemDoubleClicked.connect(self.__on_entry_double_clicked)
 
     def __set_state_variable(self, path: str) -> None:
-        self.num_col: int = 4
-        self.col_path: int = self.num_col - 1  # path column is the last
-        self.root_folder: DirectoryEntryFolder = DirectoryEntryFolder(
-            entry_name="root", path=path
-        )
-        self.pdf_window_control: PDFWindowVisualizationControl
-        self.menu_right_click: QMenu
-        self.path_to_update: str
+        self.__num_col: int = 4
+        self.__col_path: int = self.__num_col - 1  # path column is the last
+        self.__path: str = path
+        self.__root_folder: DirectoryEntryFolder
+        self.__pdf_window_control: PDFWindowVisualizationControl
+        self.__menu_right_click: QMenu
+        self.__path_to_update: str
 
     def __create_tree(self) -> None:
         self.__set_style_tree()
-        self.__create_top_level_tree()
+        self.create_top_level_tree()
 
     def __set_style_tree(self) -> None:
-        self.setColumnCount(self.num_col)
+        self.setColumnCount(self.__num_col)
         self.setFont(QFont("Calisto MT", 12))
         self.setHeaderLabels(["Name", "Type", "Buttons", "Path"])
-        base_width = application_constants.BASE_HOME_WIDTH // (self.num_col)
+        base_width = application_constants.BASE_HOME_WIDTH // (self.__num_col)
         app: Optional[QHeaderView] = self.header()
         if app is None:
             raise ValueError()
         header: QHeaderView = app
         header.setDefaultSectionSize(base_width)
 
-    def __create_top_level_tree(self) -> None:
-        entries = self.__get_subtree(self.root_folder)
+    def create_top_level_tree(self) -> None:
+        self.clear()
+        self.__root_folder = DirectoryEntryFolder(entry_name="root", path=self.__path)
+        entries = self.__get_subtree(self.__root_folder)
         self.insertTopLevelItems(0, entries)
 
     def __get_subtree(self, folder: DirectoryEntryFolder) -> list[QTreeWidgetItem]:
@@ -115,44 +116,46 @@ class DecksStructure(QTreeWidget):
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.__open_right_click_menu)
 
-        self.menu_right_click = QMenu("Menu", self)
+        self.__menu_right_click = QMenu("Menu", self)
 
-        update_button = QAction("Update PDF", self.menu_right_click)
+        update_button = QAction("Update PDF", self.__menu_right_click)
         update_button.setStatusTip(
             "Update the pdf and change accordingly the flashcard positions"
         )
         update_button.triggered.connect(self.__update_pdf)
 
-        export_anki_button = QAction("Export flashcards to Anki", self.menu_right_click)
+        export_anki_button = QAction(
+            "Export flashcards to Anki", self.__menu_right_click
+        )
         export_anki_button.setStatusTip(
             "Exports the flashcards made on this PDF to Anki"
         )
         export_anki_button.triggered.connect(self.__export_to_anki)
 
-        self.menu_right_click.addAction(update_button)
-        self.menu_right_click.addAction(export_anki_button)
+        self.__menu_right_click.addAction(update_button)
+        self.__menu_right_click.addAction(export_anki_button)
 
     def __open_right_click_menu(self, event) -> None:
         selected_items = self.selectedItems()
 
         if self.__is_valid_click(selected_items):
             full_path = self.__get_entry_full_path(selected_items[0])
-            self.path_to_update = full_path
-            self.menu_right_click.popup(QCursor.pos())
+            self.__path_to_update = full_path
+            self.__menu_right_click.popup(QCursor.pos())
 
     def __is_valid_click(self, selected_items: list[QTreeWidgetItem]) -> bool:
         return len(selected_items) > 0
 
     def __update_pdf(self, event) -> None:
-        update_pdf(self.path_to_update)
+        update_pdf(self.__path_to_update)
 
     def __export_to_anki(self, event) -> None:
-        _, ext = os.path.splitext(self.path_to_update)
+        _, ext = os.path.splitext(self.__path_to_update)
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         if ext == ".pdf":
-            IOFlashcards.save_flashcards_to_anki(self.path_to_update)
+            IOFlashcards.save_flashcards_to_anki(self.__path_to_update)
         elif ext == "":
-            self.__export_directory_to_anki(self.path_to_update)
+            self.__export_directory_to_anki(self.__path_to_update)
 
         QApplication.restoreOverrideCursor()
 
@@ -172,12 +175,12 @@ class DecksStructure(QTreeWidget):
         full_path: str = self.__get_entry_full_path(entry_pressed)
         app = full_path.strip().lower()[-4:]
         if app == ".pdf":
-            self.pdf_window_control = PDFWindowVisualizationControl(full_path)
-            self.pdf_window_control.get_pdf_window_visualization_layout().showMaximized()
+            self.__pdf_window_control = PDFWindowVisualizationControl(full_path)
+            self.__pdf_window_control.get_pdf_window_visualization_layout().showMaximized()
 
     def __get_entry_full_path(self, entry: QTreeWidgetItem) -> str:
         name_col = 0
         full_name = entry.text(name_col)
-        path_name = entry.text(self.col_path)
+        path_name = entry.text(self.__col_path)
         full_path = os.path.join(path_name, full_name)
         return full_path
