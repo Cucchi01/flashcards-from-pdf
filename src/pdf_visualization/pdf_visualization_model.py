@@ -147,6 +147,7 @@ class PDFWindowVisualizationModel:
     def __setup_window_layout(self) -> None:
         self.__setup_left_panel()
         self.__setup_bottom_widget()
+        self.__window_layout.get_advanced_options_button().setFocus()
 
     def get_current_page_index(self) -> int:
         return self.__cards_to_display[self.get_current_card_index()].get_pdf_page()
@@ -292,7 +293,7 @@ class PDFWindowVisualizationModel:
     def get_pdf_window_visualization(self) -> PDFWindowVisualizationLayout:
         return self.__window_layout
 
-    def add_page_flashcard(self, flag_generic: bool = False) -> None:
+    def manage_page_button_flashcard(self, flag_generic: bool = False) -> None:
         self.__flashcard_manager.manage_page_button_flashcard(flag_generic)
 
     def remove_current_flashcard(self) -> None:
@@ -332,3 +333,9 @@ class PDFWindowVisualizationModel:
 
     def set_current_card_index(self, new_card_index: int) -> None:
         self.__cards_navigator.set_current_card_index(new_card_index)
+
+    def focus_question_field(self) -> None:
+        self.__window_layout.get_input_text_question().setFocus()
+
+    def focus_spinbox(self) -> None:
+        self.__window_layout.get_pdf_page_num_spinbox().setFocus()

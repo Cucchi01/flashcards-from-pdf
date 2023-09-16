@@ -12,6 +12,22 @@ class PDFWindowVisualizationControl:
     def __init__(self, path_of_pdf: str) -> None:
         super().__init__()
 
+        self.__shortcut_spin_box_focus: QShortcut
+        self.__shortcut_previous_page: QShortcut
+        self.__shortcut_next_page: QShortcut
+        self.__shortcut_zoom_increase: QShortcut
+        self.__shortcut_zoom_decrease: QShortcut
+        self.__shortcut_modify_current_flashcard: QShortcut
+        self.__shortcut_focus_question_field: QShortcut
+        self.__shortcut_manage_page_button_flashcard: QShortcut
+        self.__shortcut_manage_generic_button_flashcard: QShortcut
+        self.__shortcut_delete_current_flashcard: QShortcut
+        self.__shortcut_cancel_current_flashcard_modification: QShortcut
+        self.__shortcut_previous_card: QShortcut
+        self.__shortcut_next_card: QShortcut
+        self.__shortcut_previous_flashcard: QShortcut
+        self.__shortcut_next_flashcard: QShortcut
+
         # change the CursorShape while loading the pdf
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.__pdf_window_model: PDFWindowVisualizationModel = (
@@ -49,28 +65,57 @@ class PDFWindowVisualizationControl:
             self.__pdf_window_model.update_page_spinbox_change
         )
 
+        self.__shortcut_spin_box_focus = QShortcut(
+            QKeySequence("Ctrl+G"), self.__pdf_window_layout
+        )
+        self.__shortcut_spin_box_focus.activated.connect(
+            self.__pdf_window_model.focus_spinbox
+        )
+
         self.__pdf_window_layout.get_previous_page_button().clicked.connect(
+            self.__pdf_window_model.previous_page
+        )
+        self.__shortcut_previous_page = QShortcut(
+            QKeySequence("Up"), self.__pdf_window_layout
+        )
+        self.__shortcut_previous_page.activated.connect(
             self.__pdf_window_model.previous_page
         )
         self.__pdf_window_layout.get_next_page_button().clicked.connect(
             self.__pdf_window_model.next_page
         )
+        self.__shortcut_next_page = QShortcut(
+            QKeySequence("Down"), self.__pdf_window_layout
+        )
+        self.__shortcut_next_page.activated.connect(self.__pdf_window_model.next_page)
 
     def __set_controls_left_panel_widget(self) -> None:
-        self.shortcut_zoom_increase = QShortcut(
+        self.__shortcut_zoom_increase = QShortcut(
             QKeySequence("Ctrl++"), self.__pdf_window_layout
         )
-        self.shortcut_zoom_increase.activated.connect(
+        self.__shortcut_zoom_increase.activated.connect(
             self.__pdf_window_layout.increase_zoom
         )
-        self.shortcut_zoom_decrease = QShortcut(
+        self.__shortcut_zoom_decrease = QShortcut(
             QKeySequence("Ctrl+-"), self.__pdf_window_layout
         )
-        self.shortcut_zoom_decrease.activated.connect(
+        self.__shortcut_zoom_decrease.activated.connect(
             self.__pdf_window_layout.decrease_zoom
         )
         self.__pdf_window_layout.get_flashcard_label().set_method_to_call(
             self.__pdf_window_model.modify_current_flashcard
+        )
+        self.__shortcut_modify_current_flashcard = QShortcut(
+            QKeySequence("Ctrl+E"), self.__pdf_window_layout
+        )
+        self.__shortcut_modify_current_flashcard.activated.connect(
+            self.__pdf_window_model.modify_current_flashcard
+        )
+        self.__shortcut_focus_question_field = QShortcut(
+            QKeySequence("Ctrl+A"), self.__pdf_window_layout
+        )
+        self.__shortcut_focus_question_field.activated.connect(
+            self.__pdf_window_model.focus_question_field
         )
 
     def __set_controls_right_panel_widget(self) -> None:
@@ -78,15 +123,52 @@ class PDFWindowVisualizationControl:
 
     def __set_controls_flashcard_button_layout(self) -> None:
         self.__pdf_window_layout.get_page_flashcard_button().clicked.connect(
-            partial(self.__pdf_window_model.add_page_flashcard, flag_generic=False)
+            partial(
+                self.__pdf_window_model.manage_page_button_flashcard, flag_generic=False
+            )
         )
+        self.__shortcut_manage_page_button_flashcard = QShortcut(
+            QKeySequence("Ctrl+S"), self.__pdf_window_layout
+        )
+        self.__shortcut_manage_page_button_flashcard.activated.connect(
+            partial(
+                self.__pdf_window_model.manage_page_button_flashcard, flag_generic=False
+            )
+        )
+
         self.__pdf_window_layout.get_generic_flashcard_button().clicked.connect(
-            partial(self.__pdf_window_model.add_page_flashcard, flag_generic=True)
+            partial(
+                self.__pdf_window_model.manage_page_button_flashcard, flag_generic=True
+            )
         )
+        self.__shortcut_manage_generic_button_flashcard = QShortcut(
+            QKeySequence("Ctrl+Shift+S"), self.__pdf_window_layout
+        )
+        self.__shortcut_manage_generic_button_flashcard.activated.connect(
+            partial(
+                self.__pdf_window_model.manage_page_button_flashcard, flag_generic=True
+            )
+        )
+
         self.__pdf_window_layout.get_remove_flashcard_button().clicked.connect(
             self.__pdf_window_model.remove_current_flashcard
         )
+
+        self.__shortcut_delete_current_flashcard = QShortcut(
+            QKeySequence("Ctrl+D"), self.__pdf_window_layout
+        )
+        self.__shortcut_delete_current_flashcard.activated.connect(
+            self.__pdf_window_model.remove_current_flashcard
+        )
+
         self.__pdf_window_layout.get_cancel_modification_flashcard_button().clicked.connect(
+            self.__pdf_window_model.cancel_current_flashcard_modification
+        )
+
+        self.__shortcut_cancel_current_flashcard_modification = QShortcut(
+            QKeySequence("Ctrl+R"), self.__pdf_window_layout
+        )
+        self.__shortcut_cancel_current_flashcard_modification.activated.connect(
             self.__pdf_window_model.cancel_current_flashcard_modification
         )
 
@@ -99,9 +181,22 @@ class PDFWindowVisualizationControl:
         self.__pdf_window_layout.get_previous_card_button().clicked.connect(
             self.__pdf_window_model.previous_card
         )
+
+        self.__shortcut_previous_card = QShortcut(
+            QKeySequence("Left"), self.__pdf_window_layout
+        )
+        self.__shortcut_previous_card.activated.connect(
+            self.__pdf_window_model.previous_card
+        )
+
         self.__pdf_window_layout.get_next_card_button().clicked.connect(
             self.__pdf_window_model.next_card
         )
+
+        self.__shortcut_next_card = QShortcut(
+            QKeySequence("Right"), self.__pdf_window_layout
+        )
+        self.__shortcut_next_card.activated.connect(self.__pdf_window_model.next_card)
 
     def __set_controls_current_flashcard_bottom_layout(self) -> None:
         # TODO: manage correct and mistake answers
@@ -109,7 +204,20 @@ class PDFWindowVisualizationControl:
             self.__pdf_window_model.previous_flashcard
         )
 
+        self.__shortcut_previous_flashcard = QShortcut(
+            QKeySequence("Ctrl+Left"), self.__pdf_window_layout
+        )
+        self.__shortcut_previous_flashcard.activated.connect(
+            self.__pdf_window_model.previous_flashcard
+        )
+
         self.__pdf_window_layout.get_next_flashcard_button().clicked.connect(
             self.__pdf_window_model.next_flashcard
         )
-        pass
+
+        self.__shortcut_next_flashcard = QShortcut(
+            QKeySequence("Ctrl+Right"), self.__pdf_window_layout
+        )
+        self.__shortcut_next_flashcard.activated.connect(
+            self.__pdf_window_model.next_flashcard
+        )

@@ -22,10 +22,19 @@ class RightPanelManager:
         self.__current_modified_flashcard: Flashcard
 
     def manage_page_button_flashcard(self, flag_generic: bool = False) -> None:
+        # the question cannot be empty
+        if (
+            self.__pdf_visualization_model.get_input_text_question()
+            .toPlainText()
+            .strip()
+            == ""
+        ):
+            return
+
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+
         if self.__is_flashcard_being_modified:
             self.__modify_flashcard(flag_generic)
-            self.__is_flashcard_being_modified = False
         else:
             self.__add_page_flashcard(flag_generic)
 
@@ -64,6 +73,7 @@ class RightPanelManager:
             self.__get_is_deck_ordered()
         )
 
+        self.__is_flashcard_being_modified = False
         self.__reset_card_before_modification(flashcard)
 
     def __get_flashcard_index(self, flashcard_to_search: Flashcard) -> int:
@@ -208,7 +218,7 @@ class RightPanelManager:
             card,
             PdfPage,
         ):
-            raise TypeError()
+            return
 
         flashcard: Flashcard = card
         self.__get_flashcards_from_pdf_page()[flashcard.get_reference_page()].remove(
@@ -276,6 +286,14 @@ class RightPanelManager:
         return self.__pdf_visualization_model.get_remove_flashcard_button()
 
     def modify_current_flashcard(self) -> None:
+        if (
+            isinstance(
+                self.__get_cards_to_display()[self.__get_current_card_index()],
+                Flashcard,
+            )
+            == False
+        ):
+            return
         flashcard: Flashcard = self.__get_cards_to_display()[
             self.__get_current_card_index()
         ]
@@ -324,6 +342,8 @@ class RightPanelManager:
         return self.__is_flashcard_being_modified
 
     def cancel_current_flashcard_modification(self) -> None:
+        if self.__is_flashcard_being_modified == False:
+            return
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.__is_flashcard_being_modified = False
         self.__reset_card_before_modification(self.__current_modified_flashcard)

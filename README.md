@@ -23,3 +23,22 @@ The reference page index is in 1-based format, because in this way a user can re
 There is always a +1 in the visualizazion process. So in the txt a generic page has as index -1 and internally it is store -2.
 
 It is possible to export the flashcards to a txt file that it is compatible with Anki. The txt file has to be imported manually in Anki and it is saved in data\Anki. The pdf pages related to a question are converted to jpg and saved in the media directory of Anki. The same relative path of the pdf is copied in the Anki media directory and in data\Anki.
+
+Shortcuts:
+Shortcut|Action
+---|---
+Ctrl++ | Zoom in pdf
+Ctrl+- | Zoom out pdf
+Ctrl+G | Focus on spinbox
+Ctrl+E | Edit current flashcard
+Ctrl+A | Focus on question text input(A = Add new flashcard)
+Ctrl+S | Add/modify flashcard
+Ctrl+Shif+S | Add/modify generic flashcard
+Ctrl+D | Remove current flashcard (D = delete)
+Ctrl+R | Cancel current flashcard (R = Redo)
+Up arrow | Previous page
+Down arrow | Next page
+Left arrow | Previous card
+Right arrow | Next card
+Ctrl+Left arrow | Previous flashcard
+Ctrl+Right arrow | Next flashcard

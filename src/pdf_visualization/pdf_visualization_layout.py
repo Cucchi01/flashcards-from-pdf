@@ -169,7 +169,9 @@ class PDFWindowVisualizationLayout(QWidget):
 
         question_label = QLabel("Question:")
         self.__question_input = QPlainTextEdit("")
+        self.__question_input.setTabChangesFocus(True)
         self.__answer_input = QPlainTextEdit("")
+        self.__answer_input.setTabChangesFocus(True)
         answer_label = QLabel("Answer:")
         self.__page_specific_checkbox = QCheckBox("Page specific")
         self.__page_specific_checkbox.setChecked(True)
