@@ -221,10 +221,9 @@ class IOFlashcards:
         ) = IOFlashcards.__get_tmp_path_without_ext(path_without_ext)
 
         os.makedirs(os.path.dirname(tmp_path_without_ext + ".txt"), exist_ok=True)
-        os.makedirs(media_folder_anki, exist_ok=True)
 
         with open(tmp_path_without_ext + ".txt", "w", encoding="utf-8") as file:
-            file.write("#separator:tab\n#html:true\n")
+            file.write("#separator:tab\n#html:true\n#notetype:basic\n")
 
             list_flashcards: list[Flashcard]
             reference_page: int
@@ -241,7 +240,6 @@ class IOFlashcards:
                             file,
                             flashcard,
                             path_of_pdf,
-                            basename_pdf_without_ext,
                             media_folder_anki,
                             relative_directory_position_anki,
                         )
@@ -280,9 +278,7 @@ class IOFlashcards:
         relative_directory_position_anki = "\\data" + relative_directory_position_anki
         path_without_ext = os.getcwd() + "\\data\\Anki" + relative_file_position
 
-        media_folder_anki: str = os.path.expandvars(
-            ANKI_CONTENT_DIRECTORY + relative_directory_position_anki
-        )
+        media_folder_anki: str = os.path.expandvars(ANKI_CONTENT_DIRECTORY)
 
         return (
             path_without_ext,
@@ -306,20 +302,19 @@ class IOFlashcards:
         file: TextIOWrapper,
         flashcard: Flashcard,
         path_of_pdf: str,
-        basename_pdf_without_ext: str,
         media_folder_anki: str,
         relative_directory_position_anki: str,
     ) -> None:
         filename: str = (
-            date.today().strftime("%y_%m_%d")
+            relative_directory_position_anki.replace("\\", "_")
             + "_"
-            + basename_pdf_without_ext
+            + date.today().strftime("%y_%m_%d")
             + "_"
             + str(flashcard.get_pdf_page())
             + "_"
             + str(randint(0, 10000)).zfill(5)
             + ".jpg"
-        )
+        ).replace(" ", "_")
 
         page: list[PILImage.Image] = convert_from_path(
             path_of_pdf,
@@ -330,8 +325,8 @@ class IOFlashcards:
         if len(page) == 0:
             raise ValueError("No page")
 
-        if not os.path.exists(media_folder_anki + r"\\" + filename):
-            page[0].save(media_folder_anki + r"\\" + filename, "JPEG")
+        if not os.path.exists(media_folder_anki + "\\" + filename):
+            page[0].save(media_folder_anki + "\\" + filename, "JPEG")
             file.write(
                 ANKI_FLASHCARDS_SEPARATOR.join(
                     [
@@ -339,8 +334,6 @@ class IOFlashcards:
                         '"'
                         + flashcard.get_answer()
                         + '<br><img src=""'
-                        + relative_directory_position_anki
-                        + "\\"
                         + filename
                         + '"">"\n',
                     ]
