@@ -38,3 +38,9 @@ with open(PATH_TO_DECKS_ABS + "\\private_folder_anki.txt") as file:
 PDFS_DIRECTORY_PATH: str = ""
 with open(PATH_TO_DECKS_ABS + "\\private_pdf_folder.txt") as file:
     PDFS_DIRECTORY_PATH = file.readline().strip(" \n")
+
+HIDDEN_ROOT_ENTRIES: list[str] = [
+    "private_folder_anki.txt",
+    "private_pdf_folder.txt",
+    "Anki",
+]

@@ -61,7 +61,14 @@ class DecksStructure(QTreeWidget):
         self.clear()
         self.__root_folder = DirectoryEntryFolder(entry_name="root", path=self.__path)
         entries = self.__get_subtree(self.__root_folder)
-        self.insertTopLevelItems(0, entries)
+        self.insertTopLevelItems(
+            0,
+            filter(
+                lambda entry: entry.text(0)
+                not in application_constants.HIDDEN_ROOT_ENTRIES,
+                entries,
+            ),
+        )
 
     def __get_subtree(self, folder: DirectoryEntryFolder) -> list[QTreeWidgetItem]:
         entries: list[QTreeWidgetItem] = []
