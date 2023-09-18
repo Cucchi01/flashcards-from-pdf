@@ -32,17 +32,20 @@ class PDFWindowVisualizationModel:
             with open(path_of_flashcards, "w", encoding="utf-8") as file:
                 file.write("0\n0\n0\n")
 
+        self.__path_of_pdf: str = path_of_pdf
+        self.__filename: str = os.path.basename(path_of_pdf)
+        self.__num_pdf_pages: int = IOFlashcards.get_pdf_page_count(self.__path_of_pdf)
+        self.__point: QPointF = QPointF(0, 0)
+
         self.__io_flashcards_info: PDFTestsInfo = IOFlashcards.get_past_tests_info(
             path_of_flashcards
         )
         self.__flashcards_from_pdf_page: dict[
             int, list[Flashcard]
         ] = IOFlashcards.get_flashcards_from_txt(path_of_flashcards)
-
-        self.__path_of_pdf: str = path_of_pdf
-        self.__filename: str = os.path.basename(path_of_pdf)
-        self.__num_pdf_pages: int = IOFlashcards.get_pdf_page_count(self.__path_of_pdf)
-        self.__point: QPointF = QPointF(0, 0)
+        self.__update_invalid_page_references(
+            self.__flashcards_from_pdf_page, self.__num_pdf_pages
+        )
 
         self.__cards_to_display: list[Card]
         self.__num_pdf_page_to_card_index: list[int]
@@ -143,6 +146,24 @@ class PDFWindowVisualizationModel:
 
     def get_next_card_button(self) -> QPushButton:
         return self.__window_layout.get_next_card_button()
+
+    def __update_invalid_page_references(
+        self, flashcards: dict[int, list[Flashcard]], num_pdf_pages: int
+    ) -> None:
+        # if a pdf file is updated and afterwards it has less pages, old flashcards could have a reference_page to a not existing page.
+        # At the first update/addition/removal of a flashcard these changes will be saved to disk
+        num_page: int
+        list_flashcards: list[Flashcard]
+        for num_page, list_flashcards in flashcards.copy().items():
+            if num_page >= num_pdf_pages:
+                for flashcard in list_flashcards:
+                    flashcard.set_reference_page(num_pdf_pages - 1)
+                if num_pdf_pages - 1 in flashcards.keys():
+                    flashcards[num_pdf_pages - 1].extend(list_flashcards)
+                else:
+                    flashcards[num_pdf_pages - 1] = list_flashcards
+
+                flashcards.pop(num_page)
 
     def __setup_window_layout(self) -> None:
         self.__setup_left_panel()

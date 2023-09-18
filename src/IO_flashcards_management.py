@@ -213,6 +213,8 @@ class IOFlashcards:
             media_folder_anki,
         ) = IOFlashcards.__get_path_information_to_anki(path_of_file)
 
+        num_pdf_pages: int = IOFlashcards.get_pdf_page_count(path_of_pdf)
+
         tmp_path_without_ext: str
         is_path_already_existing: bool
         (
@@ -240,6 +242,7 @@ class IOFlashcards:
                             file,
                             flashcard,
                             path_of_pdf,
+                            num_pdf_pages,
                             media_folder_anki,
                             relative_directory_position_anki,
                         )
@@ -302,15 +305,23 @@ class IOFlashcards:
         file: TextIOWrapper,
         flashcard: Flashcard,
         path_of_pdf: str,
+        num_pdf_pages: int,
         media_folder_anki: str,
         relative_directory_position_anki: str,
     ) -> None:
+        # if the reference_page exeeds the boundaries, then it is set to the last pdf page. This can happen when there are old flashcards and a pdf is updated to a pdf with fewer pages
+        reference_page: int = (
+            flashcard.get_pdf_page()
+            if flashcard.get_pdf_page() < num_pdf_pages
+            else num_pdf_pages - 1
+        )
+
         filename: str = (
             relative_directory_position_anki.replace("\\", "_")
             + "_"
             + date.today().strftime("%y_%m_%d")
             + "_"
-            + str(flashcard.get_pdf_page())
+            + str(reference_page)
             + "_"
             + str(randint(0, 10000)).zfill(5)
             + ".jpg"
@@ -319,13 +330,13 @@ class IOFlashcards:
         page: list[PILImage.Image] = convert_from_path(
             path_of_pdf,
             dpi=200,
-            first_page=flashcard.get_pdf_page() + 1,  # base-1
-            last_page=flashcard.get_pdf_page() + 1,  # base-1
+            first_page=reference_page + 1,  # base-1
+            last_page=reference_page + 1,  # base-1
         )
-        if len(page) == 0:
-            raise ValueError("No page")
-
-        if not os.path.exists(media_folder_anki + "\\" + filename):
+        if (
+            len(page) != 0
+            and os.path.exists(media_folder_anki + "\\" + filename) == False
+        ):
             page[0].save(media_folder_anki + "\\" + filename, "JPEG")
             file.write(
                 ANKI_FLASHCARDS_SEPARATOR.join(
@@ -336,6 +347,16 @@ class IOFlashcards:
                         + '<br><img src=""'
                         + filename
                         + '"">"\n',
+                    ]
+                )
+            )
+        else:
+            # if the reference page do not exists or there are problems with the saving of the image
+            file.write(
+                ANKI_FLASHCARDS_SEPARATOR.join(
+                    [
+                        flashcard.get_question(),
+                        '"' + flashcard.get_answer() + '"\n',
                     ]
                 )
             )
