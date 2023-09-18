@@ -33,3 +33,8 @@ file: TextIOWrapper
 ANKI_CONTENT_DIRECTORY: str = ""
 with open(PATH_TO_DECKS_ABS + "\\private_folder_anki.txt") as file:
     ANKI_CONTENT_DIRECTORY = file.readline().strip(" \n")
+
+
+PDFS_DIRECTORY_PATH: str = ""
+with open(PATH_TO_DECKS_ABS + "\\private_pdf_folder.txt") as file:
+    PDFS_DIRECTORY_PATH = file.readline().strip(" \n")

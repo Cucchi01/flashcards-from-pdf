@@ -16,7 +16,7 @@ import application_constants
 from pdf_visualization.pdf_visualization_control import PDFWindowVisualizationControl
 from pdf_visualization.pdf_visualization_layout import PDFWindowVisualizationLayout
 from deck_directory import DirectoryEntryFolder, DirectoryEntryFile, FILE, FOLDER
-from update_pdf import update_pdf
+from update_pdf import update_file
 from IO_flashcards_management import IOFlashcards
 
 
@@ -118,11 +118,11 @@ class DecksStructure(QTreeWidget):
 
         self.__menu_right_click = QMenu("Menu", self)
 
-        update_button = QAction("Update PDF", self.__menu_right_click)
+        update_button = QAction("Update", self.__menu_right_click)
         update_button.setStatusTip(
             "Update the pdf and change accordingly the flashcard positions"
         )
-        update_button.triggered.connect(self.__update_pdf)
+        update_button.triggered.connect(self.__update_file)
 
         export_anki_button = QAction(
             "Export flashcards to Anki", self.__menu_right_click
@@ -146,8 +146,8 @@ class DecksStructure(QTreeWidget):
     def __is_valid_click(self, selected_items: list[QTreeWidgetItem]) -> bool:
         return len(selected_items) > 0
 
-    def __update_pdf(self, event) -> None:
-        update_pdf(self.__path_to_update)
+    def __update_file(self, event) -> None:
+        update_file(self.__path_to_update)
 
     def __export_to_anki(self, event) -> None:
         _, ext = os.path.splitext(self.__path_to_update)
