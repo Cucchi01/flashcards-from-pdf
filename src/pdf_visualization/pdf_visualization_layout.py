@@ -94,9 +94,13 @@ class PDFWindowVisualizationLayout(QWidget):
 
         self.__shuffle_button = QPushButton()
         self.__shuffle_button.setText("Shuffle")
+        self.__restart_test_button = QPushButton()
+        self.__restart_test_button.setText("Restart test")
+        self.__restart_test_button.setDisabled(True)
 
         layout_title.addWidget(self.__shuffle_button, stretch=1)
-        layout_title.addWidget(label, stretch=4)
+        layout_title.addWidget(self.__restart_test_button, stretch=1)
+        layout_title.addWidget(label, stretch=3)
 
         layout.addLayout(layout_title)
         layout.addLayout(self.__set_page_position_layout())
@@ -291,6 +295,9 @@ class PDFWindowVisualizationLayout(QWidget):
 
     def get_shuffle_button(self) -> QPushButton:
         return self.__shuffle_button
+
+    def get_restart_test_button(self) -> QPushButton:
+        return self.__restart_test_button
 
     def get_pdf_page_num_spinbox(self) -> QSpinBox:
         return self.__pdf_page_num_spinbox

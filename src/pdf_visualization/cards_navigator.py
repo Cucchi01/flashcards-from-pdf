@@ -280,6 +280,7 @@ class CardsNavigator:
         self.__update_cancel_modification_flashcard_button()
         self.__pdf_window_model.get_test_manager().update_still_learning_button()
         self.__pdf_window_model.get_test_manager().update_know_button()
+        self.__pdf_window_model.get_test_manager().update_restart_test_button()
 
     def __update_previous_page_button_state(self) -> None:
         previous_page_index: int = self.__get_previous_page_index_previous_page_button()

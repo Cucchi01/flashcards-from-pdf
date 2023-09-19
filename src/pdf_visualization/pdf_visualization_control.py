@@ -55,6 +55,9 @@ class PDFWindowVisualizationControl:
         self.__pdf_window_layout.get_shuffle_button().clicked.connect(
             self.__pdf_window_model.shuffle_button_pressed
         )
+        self.__pdf_window_layout.get_restart_test_button().clicked.connect(
+            self.__pdf_window_model.restart_test_pressed
+        )
 
         self.__pdf_window_layout.get_advanced_options_button().clicked.connect(
             self.__pdf_window_model.advanced_options_button_pressed

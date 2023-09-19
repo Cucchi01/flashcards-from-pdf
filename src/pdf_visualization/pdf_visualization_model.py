@@ -181,6 +181,9 @@ class PDFWindowVisualizationModel:
     def get_current_page_index(self) -> int:
         return self.__cards_to_display[self.get_current_card_index()].get_pdf_page()
 
+    def restart_test_pressed(self) -> None:
+        self.__test_manager.restart_test()
+
     def shuffle_button_pressed(self) -> None:
         self.refresh_page(not self.__is_deck_ordered)
 

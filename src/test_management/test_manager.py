@@ -34,6 +34,9 @@ class TestManager:
     def update_know_button(self) -> None:
         self.__update_test_button(self.__pdf_window_layout.get_know_button())
 
+    def update_restart_test_button(self) -> None:
+        self.__update_test_button(self.__pdf_window_layout.get_restart_test_button())
+
     def __update_test_button(self, button: QPushButton) -> None:
         if (
             self.__pdf_window_model.get_is_deck_ordered()
@@ -42,6 +45,13 @@ class TestManager:
             button.setDisabled(True)
         else:
             button.setDisabled(False)
+
+    def restart_test(self) -> None:
+        self.__reset_flashcards_result(True)
+        self.__pdf_window_model.refresh_merged_cards(
+            self.__pdf_window_model.get_is_deck_ordered()
+        )
+        self.get_cards_navigator().set_current_card_index(0)
 
     def still_learning_answer(self) -> None:
         self.__change_current_flashcard_result(Flashcard.Result.STILL_LEARNING)
@@ -120,18 +130,22 @@ class TestManager:
         return num_know / num_flashcards * 100
 
     def __setup_next_test(self) -> None:
-        list_flashcard: list[Flashcard]
         finished: bool = abs(self.__get_current_test_percentage() - 100.0) <= 4e-4
+        if finished:
+            self.__pdf_window_model.refresh_page(is_deck_ordered=True)
+
+        self.__reset_flashcards_result(finished)
+
+    def __reset_flashcards_result(self, finished: bool) -> None:
         if finished:
             self.get_pdf_tests_info().set_first_pass_flag(
                 self.get_pdf_tests_info().FirstPass.TRUE
             )
-            self.__pdf_window_model.refresh_page(is_deck_ordered=True)
         else:
             self.get_pdf_tests_info().set_first_pass_flag(
                 self.get_pdf_tests_info().FirstPass.FALSE
             )
-
+        list_flashcard: list[Flashcard]
         for (
             _,
             list_flashcard,
