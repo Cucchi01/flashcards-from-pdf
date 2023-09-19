@@ -31,16 +31,23 @@ ANKI_FLASHCARDS_SEPARATOR: str = "\t"
 
 file: TextIOWrapper
 ANKI_CONTENT_DIRECTORY: str = ""
-with open(PATH_TO_DECKS_ABS + "\\private_folder_anki.txt") as file:
+PRIVATE_FILE_WITH_FOLDER_ANKI: str = "private_folder_anki.txt"
+with open(PATH_TO_DECKS_ABS + "\\" + PRIVATE_FILE_WITH_FOLDER_ANKI) as file:
     ANKI_CONTENT_DIRECTORY = file.readline().strip(" \n")
 
 
 PDFS_DIRECTORY_PATH: str = ""
-with open(PATH_TO_DECKS_ABS + "\\private_pdf_folder.txt") as file:
+PRIVATE_FILE_WITH_PDFS_DIRECTORY: str = "private_pdf_folder.txt"
+with open(PATH_TO_DECKS_ABS + "\\" + PRIVATE_FILE_WITH_PDFS_DIRECTORY) as file:
     PDFS_DIRECTORY_PATH = file.readline().strip(" \n")
 
+PRIVATE_DB_FILENAME = "private_flashcards_from_pdf.db"
+DB_START_TIMESTAMP_TYPE = "S"
+DB_END_TIMESTAMP_TYPE = "E"
+
 HIDDEN_ROOT_ENTRIES: list[str] = [
-    "private_folder_anki.txt",
-    "private_pdf_folder.txt",
+    PRIVATE_FILE_WITH_FOLDER_ANKI,
+    PRIVATE_FILE_WITH_PDFS_DIRECTORY,
     "Anki",
+    PRIVATE_DB_FILENAME,
 ]

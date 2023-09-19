@@ -20,10 +20,16 @@ from application_constants import (
     BASE_HOME_HEIGHT,
     APPLICATION_STYLE,
     FONT,
+    PRIVATE_DB_FILENAME,
+    DB_START_TIMESTAMP_TYPE,
+    DB_END_TIMESTAMP_TYPE,
 )
 from decks_tree import DecksStructure
 
 import sys
+import sqlite3
+import os
+from datetime import datetime
 
 
 class MainWindow(QWidget):
@@ -91,9 +97,49 @@ class MainWindow(QWidget):
         return stats_page
 
 
+def add_new_start_timestamp() -> None:
+    add_time_stamp(DB_START_TIMESTAMP_TYPE)
+
+
+def add_new_end_timestamp() -> None:
+    add_time_stamp(DB_END_TIMESTAMP_TYPE)
+
+
+def add_time_stamp(type: str) -> None:
+    try:
+        con = sqlite3.connect(os.path.join(PATH_TO_DECKS_ABS, PRIVATE_DB_FILENAME))
+        cur = con.cursor()
+        res = cur.execute("SELECT * FROM sqlite_master where name='timestamp'")
+        if res.fetchone() is None:
+            cur.execute(
+                """CREATE TABLE timestamp (id integer primary key autoincrement ,
+                                        timestamp timestamp NOT NULL,
+                                        type varchar(1))"""
+            )
+
+        insert_query = """INSERT INTO 'timestamp'
+                            ('timestamp', 'type') 
+                            VALUES (?, ?);"""
+
+        data_insert = (datetime.now(), type)
+        cur.execute(insert_query, data_insert)
+        con.commit()
+        cur.close()
+    finally:
+        if con:
+            con.close()
+
+
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setStyleSheet(APPLICATION_STYLE)
-    app.setFont(FONT)
-    window = MainWindow()
-    sys.exit(app.exec())
+    add_new_start_timestamp()
+    exit_code: int = 1
+    try:
+        app = QApplication(sys.argv)
+        app.setStyleSheet(APPLICATION_STYLE)
+        app.setFont(FONT)
+        window = MainWindow()
+        exit_code = app.exec()
+    finally:
+        add_new_end_timestamp()
+
+        sys.exit(exit_code)
