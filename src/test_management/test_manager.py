@@ -37,7 +37,7 @@ class TestManager:
     def __update_test_button(self, button: QPushButton) -> None:
         if (
             self.__pdf_window_model.get_is_deck_ordered()
-            or self.__pdf_window_model.get_num_flashcards() == 0
+            or self.__pdf_window_model.get_num_not_done_flashcards() == 0
         ):
             button.setDisabled(True)
         else:
@@ -52,7 +52,7 @@ class TestManager:
     def __change_current_flashcard_result(self, result: Flashcard.Result) -> None:
         if (
             self.__pdf_window_model.get_is_deck_ordered()
-            or self.__pdf_window_model.get_num_flashcards() == 0
+            or self.__pdf_window_model.get_num_not_done_flashcards() == 0
         ):
             return
 
@@ -77,7 +77,7 @@ class TestManager:
         return flashcard
 
     def __finalize_flashcard_change(self) -> None:
-        if self.__pdf_window_model.get_num_flashcards() == 1:
+        if self.__pdf_window_model.get_num_not_done_flashcards() == 1:
             # this is the last flashcard
             self.__update_tests_info()
             self.__show_dialog_test_completed()

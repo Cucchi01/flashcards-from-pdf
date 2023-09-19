@@ -358,6 +358,13 @@ class PDFWindowVisualizationModel:
         )
 
     def get_num_flashcards(self) -> int:
+        cont: int = 0
+        list_flashcards: list[Flashcard]
+        for _, list_flashcards in self.__flashcards_from_pdf_page.items():
+            cont += len(list_flashcards)
+        return cont
+
+    def get_num_not_done_flashcards(self) -> int:
         return len(self.__num_flashcard_to_card_index)
 
     def set_current_card_index(self, new_card_index: int) -> None:

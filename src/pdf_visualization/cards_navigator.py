@@ -209,7 +209,7 @@ class CardsNavigator:
     def next_flashcard(self) -> None:
         new_card_index: int
         next_flashcard_index: int = self.__get_next_flashcard_index()
-        if next_flashcard_index < self.get_num_flashcards():
+        if next_flashcard_index < self.get_num_not_done_flashcards():
             new_card_index = self.get_num_flashcard_to_card_index()[
                 next_flashcard_index
             ]
@@ -354,12 +354,12 @@ class CardsNavigator:
 
     def __update_next_flashcard_button_state(self) -> None:
         next_flashcard_index = self.__get_next_flashcard_index()
-        if next_flashcard_index == self.get_num_flashcards():
+        if next_flashcard_index == self.get_num_not_done_flashcards():
             self.__get_next_flashcard_button().setDisabled(True)
             self.__is_next_flashcard_button_disabled = True
         elif (
             next_flashcard_index >= 0
-            and next_flashcard_index < self.get_num_flashcards()
+            and next_flashcard_index < self.get_num_not_done_flashcards()
         ):
             self.__get_next_flashcard_button().setDisabled(False)
             self.__is_next_flashcard_button_disabled = False
@@ -383,8 +383,8 @@ class CardsNavigator:
     def __get_next_flashcard_button(self) -> QPushButton:
         return self.__pdf_window_model.get_next_flashcard_button()
 
-    def get_num_flashcards(self):
-        return self.__pdf_window_model.get_num_flashcards()
+    def get_num_not_done_flashcards(self):
+        return self.__pdf_window_model.get_num_not_done_flashcards()
 
     def __update_previous_card_button_state(self) -> None:
         if self.get_is_page_navigator_active():
