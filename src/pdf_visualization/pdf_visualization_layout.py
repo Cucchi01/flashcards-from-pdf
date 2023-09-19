@@ -28,6 +28,7 @@ class PDFWindowVisualizationLayout(QWidget):
 
         # header
         self.__shuffle_button: QPushButton
+        self.__pdf_spinbox_label: QLabel
         self.__pdf_page_num_spinbox: QSpinBox
         self.__previous_page_button: QPushButton
         self.__next_page_button: QPushButton
@@ -120,7 +121,8 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__next_page_button = QPushButton()
         self.__next_page_button.setText("Next Page")
 
-        label = QLabel("Pdf page:", page_pos_layout)
+        self.__pdf_spinbox_label = QLabel("Pdf page:", page_pos_layout)
+        self.__pdf_spinbox_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.__pdf_page_num_spinbox = QSpinBox(page_pos_layout)
         self.__pdf_page_num_spinbox.setMinimum(1)
         self.__pdf_page_num_spinbox.setMaximum(self.__num_pdf_pages)
@@ -131,7 +133,7 @@ class PDFWindowVisualizationLayout(QWidget):
 
         layout.addWidget(self.__previous_page_button)
         layout.addWidget(self.__next_page_button)
-        layout.addWidget(label)
+        layout.addWidget(self.__pdf_spinbox_label)
         layout.addWidget(self.__pdf_page_num_spinbox)
         layout.addWidget(self.__advanced_options_button)
 
@@ -298,6 +300,9 @@ class PDFWindowVisualizationLayout(QWidget):
 
     def get_restart_test_button(self) -> QPushButton:
         return self.__restart_test_button
+
+    def get_pdf_spinbox_label(self) -> QLabel:
+        return self.__pdf_spinbox_label
 
     def get_pdf_page_num_spinbox(self) -> QSpinBox:
         return self.__pdf_page_num_spinbox

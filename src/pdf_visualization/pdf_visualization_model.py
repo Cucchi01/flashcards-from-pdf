@@ -174,6 +174,9 @@ class PDFWindowVisualizationModel:
                 flashcards.pop(num_page)
 
     def __setup_window_layout(self) -> None:
+        self.__window_layout.get_pdf_spinbox_label().setText(
+            "Num. pages: " + str(self.get_num_pdf_pages()) + ". Current pdf page:"
+        )
         self.__setup_left_panel()
         self.__setup_bottom_widget()
         self.__window_layout.get_advanced_options_button().setFocus()
