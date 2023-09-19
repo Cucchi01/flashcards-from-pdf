@@ -20,7 +20,7 @@ from test_management.pdf_test_info import PDFTestsInfo
 from pdf_visualization.right_panel_manager import RightPanelManager
 
 
-class CardNavigator:
+class CardsNavigator:
     def __init__(self, pdf_window_model: "PDFWindowVisualizationModel") -> None:
         self.__pdf_window_model: "PDFWindowVisualizationModel" = pdf_window_model
 
@@ -32,8 +32,8 @@ class CardNavigator:
         self.__is_previous_card_button_disabled: bool = True
         self.__is_next_card_button_disabled: bool = False
         self.__is_next_flashcard_button_disabled: bool = True
-        self.__shuffle_pdf_navigator: CardNavigator.ShufflePdfPageNavigator = (
-            CardNavigator.ShufflePdfPageNavigator()
+        self.__shuffle_pdf_navigator: CardsNavigator.ShufflePdfPageNavigator = (
+            CardsNavigator.ShufflePdfPageNavigator()
         )
 
         self.__setup_current_card_bottom_layout()
@@ -41,16 +41,19 @@ class CardNavigator:
     def get_current_card_index(self) -> int:
         return self.__current_card_index
 
+    def get_is_page_navigator_active(self) -> bool:
+        return self.__shuffle_pdf_navigator.get_is_page_navigator_active()
+
     def __get_num_pdf_pages(self) -> int:
         return self.__pdf_window_model.get_num_pdf_pages()
 
-    def __get_cards_to_display(self) -> list[Card]:
+    def get_cards_to_display(self) -> list[Card]:
         return self.__pdf_window_model.get_cards_to_display()
 
     def __get_num_pdf_page_to_card_index(self) -> list[int]:
         return self.__pdf_window_model.get_num_pdf_page_to_card_index()
 
-    def __get_num_flashcard_to_card_index(self) -> list[int]:
+    def get_num_flashcard_to_card_index(self) -> list[int]:
         return self.__pdf_window_model.get_num_flashcard_to_card_index()
 
     def __get_num_cards(self) -> int:
@@ -115,9 +118,9 @@ class CardNavigator:
     def __check_activation_shuffle_navigator(self):
         # In shuffle mode, after clicking previous page or next page on a pdf page the shuffle navigator should be active
         if (
-            self.__shuffle_pdf_navigator.get_is_page_navigator_active() == False
+            self.get_is_page_navigator_active() == False
             and isinstance(
-                self.__get_cards_to_display()[self.__current_card_index], PdfPage
+                self.get_cards_to_display()[self.__current_card_index], PdfPage
             )
             and self.__get_is_deck_ordered() == False
         ):
@@ -126,7 +129,7 @@ class CardNavigator:
     def __active_shuffle_navigator(self):
         self.__shuffle_pdf_navigator.set_is_page_navigator_active(True)
         self.__shuffle_pdf_navigator.set_starting_pdf_page(
-            self.__get_cards_to_display()[self.__current_card_index]
+            self.get_cards_to_display()[self.__current_card_index]
         )
 
     class ShufflePdfPageNavigator:
@@ -150,9 +153,9 @@ class CardNavigator:
 
     def previous_card(self) -> None:
         if isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], Flashcard
+            self.get_cards_to_display()[self.__current_card_index], Flashcard
         ):
-            flashcard: Flashcard = self.__get_cards_to_display()[
+            flashcard: Flashcard = self.get_cards_to_display()[
                 self.__current_card_index
             ]
             # if an answer is visualized, the previous step is the question
@@ -172,9 +175,9 @@ class CardNavigator:
             return None
 
         # if an question is visualized, the next step is the answer, if present
-        card: Card = self.__get_cards_to_display()[self.__current_card_index]
+        card: Card = self.get_cards_to_display()[self.__current_card_index]
         if isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], Flashcard
+            self.get_cards_to_display()[self.__current_card_index], Flashcard
         ):
             flashcard: Flashcard = card
             if (
@@ -198,7 +201,7 @@ class CardNavigator:
         new_card_index: int
         index_flashcard_before: int = self.__get_index_flashcard_before()
         if index_flashcard_before != -1:
-            new_card_index = self.__get_num_flashcard_to_card_index()[
+            new_card_index = self.get_num_flashcard_to_card_index()[
                 index_flashcard_before
             ]
             self.set_current_card_index(new_card_index)
@@ -206,8 +209,8 @@ class CardNavigator:
     def next_flashcard(self) -> None:
         new_card_index: int
         next_flashcard_index: int = self.__get_next_flashcard_index()
-        if next_flashcard_index < self.__get_num_flashcards():
-            new_card_index = self.__get_num_flashcard_to_card_index()[
+        if next_flashcard_index < self.get_num_flashcards():
+            new_card_index = self.get_num_flashcard_to_card_index()[
                 next_flashcard_index
             ]
             self.set_current_card_index(new_card_index)
@@ -216,13 +219,13 @@ class CardNavigator:
         index_flashcard_before: int
         if (
             self.__get_is_deck_ordered() == False
-            and self.__shuffle_pdf_navigator.get_is_page_navigator_active()
+            and self.get_is_page_navigator_active()
         ):
             index_flashcard_before = (
                 self.__shuffle_pdf_navigator.get_starting_pdf_page().get_flashcard_index_before()
             )
         else:
-            index_flashcard_before = self.__get_cards_to_display()[
+            index_flashcard_before = self.get_cards_to_display()[
                 self.__current_card_index
             ].get_flashcard_index_before()
         return index_flashcard_before
@@ -241,11 +244,11 @@ class CardNavigator:
         # In shuffle mode, multiple PdfPage instances of the same pdf page could have been created. So, the comparison has to be done on the content and not on the reference.
         # The reason for this design choice is that a PDF page could be referenced by multiple flashcards, so you can't store in a single instance of a PdfPage the last flashcard because this value would overwrite the other admissible values. A set of all possible previous flashcards isn't also a possible choice, because in that case, you wouldn't know which is the last flashcard among them, that we want to consider.
         # When using the next page button or the previous page button the change of card is made using a num_pdf_page_to_card_index a vector that gives for each pdf_page_index the corresponding card_index. The choice of the vector is for the same reasons explained before. It is only a vector so it can store only one of the possible instances of a PdfPage. For this reason, doing next_page and then previous_page can take to a different PdfPage instance from the starting one.
-        if self.__shuffle_pdf_navigator.get_is_page_navigator_active() and (
+        if self.get_is_page_navigator_active() and (
             (
-                self.__get_cards_to_display()[self.__current_card_index].__class__
+                self.get_cards_to_display()[self.__current_card_index].__class__
                 == self.__shuffle_pdf_navigator.get_starting_pdf_page().__class__
-                and self.__get_cards_to_display()[self.__current_card_index].compare_to(
+                and self.get_cards_to_display()[self.__current_card_index].compare_to(
                     self.__shuffle_pdf_navigator.get_starting_pdf_page()
                 )
             )
@@ -254,8 +257,8 @@ class CardNavigator:
             self.set_current_card_index(
                 self.__shuffle_pdf_navigator.get_starting_pdf_page().get_card_index()
             )
-        elif self.__shuffle_pdf_navigator.get_is_page_navigator_active() and isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], Flashcard
+        elif self.get_is_page_navigator_active() and isinstance(
+            self.get_cards_to_display()[self.__current_card_index], Flashcard
         ):
             # the navigator is active only when going through pdf pages
             self.__shuffle_pdf_navigator.set_is_page_navigator_active(False)
@@ -275,6 +278,8 @@ class CardNavigator:
         self.__update_add_generic_flashcard_button()
         self.__update_remove_flashcard_button()
         self.__update_cancel_modification_flashcard_button()
+        self.__pdf_window_model.get_test_manager().update_still_learning_button()
+        self.__pdf_window_model.get_test_manager().update_know_button()
 
     def __update_previous_page_button_state(self) -> None:
         previous_page_index: int = self.__get_previous_page_index_previous_page_button()
@@ -292,20 +297,20 @@ class CardNavigator:
         previous_page_index: int
         # When there is an ordered visualization or the current card is a PDF page, it uses the information saved during the generation of the cards. When the deck is shuffled and it is currently displayed a Flashcard, the PDF page before is the one referenced by the flashcard before, if present
         if self.__get_is_deck_ordered() == False and isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], Flashcard
+            self.get_cards_to_display()[self.__current_card_index], Flashcard
         ):
-            index_flashcard_before: int = self.__get_cards_to_display()[
+            index_flashcard_before: int = self.get_cards_to_display()[
                 self.__current_card_index
             ].get_flashcard_index_before()
             if index_flashcard_before == -1:
                 previous_page_index = Flashcard.GENERIC_PAGE
             else:
-                card: Card = self.__get_cards_to_display()[
-                    self.__get_num_flashcard_to_card_index()[index_flashcard_before]
+                card: Card = self.get_cards_to_display()[
+                    self.get_num_flashcard_to_card_index()[index_flashcard_before]
                 ]
                 previous_page_index = card.get_pdf_page_index_before() + 1
         else:
-            previous_page_index = self.__get_cards_to_display()[
+            previous_page_index = self.get_cards_to_display()[
                 self.__current_card_index
             ].get_pdf_page_index_before()
 
@@ -323,14 +328,12 @@ class CardNavigator:
 
     def __get_next_page_index(self) -> int:
         next_page_index: int = (
-            self.__get_cards_to_display()[
+            self.get_cards_to_display()[
                 self.__current_card_index
             ].get_pdf_page_index_before()
             + 1
         )
-        if isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], PdfPage
-        ):
+        if isinstance(self.get_cards_to_display()[self.__current_card_index], PdfPage):
             next_page_index += 1
         return next_page_index
 
@@ -351,12 +354,12 @@ class CardNavigator:
 
     def __update_next_flashcard_button_state(self) -> None:
         next_flashcard_index = self.__get_next_flashcard_index()
-        if next_flashcard_index == self.__get_num_flashcards():
+        if next_flashcard_index == self.get_num_flashcards():
             self.__get_next_flashcard_button().setDisabled(True)
             self.__is_next_flashcard_button_disabled = True
         elif (
             next_flashcard_index >= 0
-            and next_flashcard_index < self.__get_num_flashcards()
+            and next_flashcard_index < self.get_num_flashcards()
         ):
             self.__get_next_flashcard_button().setDisabled(False)
             self.__is_next_flashcard_button_disabled = False
@@ -364,7 +367,15 @@ class CardNavigator:
     def __get_next_flashcard_index(self) -> int:
         next_flashcard_index: int = self.__get_index_flashcard_before() + 1
         if isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], Flashcard
+            self.get_cards_to_display()[self.__current_card_index], Flashcard
+        ):
+            next_flashcard_index += 1
+        return next_flashcard_index
+
+    def get_current_flashcard_index(self) -> int:
+        next_flashcard_index: int = self.__get_index_flashcard_before()
+        if isinstance(
+            self.get_cards_to_display()[self.__current_card_index], Flashcard
         ):
             next_flashcard_index += 1
         return next_flashcard_index
@@ -372,11 +383,11 @@ class CardNavigator:
     def __get_next_flashcard_button(self) -> QPushButton:
         return self.__pdf_window_model.get_next_flashcard_button()
 
-    def __get_num_flashcards(self):
+    def get_num_flashcards(self):
         return self.__pdf_window_model.get_num_flashcards()
 
     def __update_previous_card_button_state(self) -> None:
-        if self.__shuffle_pdf_navigator.get_is_page_navigator_active():
+        if self.get_is_page_navigator_active():
             self.__get_previous_card_button().setDisabled(True)
             self.__is_previous_card_button_disabled = True
 
@@ -385,10 +396,10 @@ class CardNavigator:
             self.__is_previous_card_button_disabled = False
 
         elif self.__current_card_index == 0 and isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], Flashcard
+            self.get_cards_to_display()[self.__current_card_index], Flashcard
         ):
             # if the card index is 0 and it is currently visualized an answer, then the previous card is the corresponding question
-            flashcard: Flashcard = self.__get_cards_to_display()[
+            flashcard: Flashcard = self.get_cards_to_display()[
                 self.__current_card_index
             ]
             if flashcard.get_answer() == self.__get_flashcard_label_text():
@@ -405,14 +416,14 @@ class CardNavigator:
         return self.__pdf_window_model.get_previous_card_button()
 
     def __update_next_card_button_state(self) -> None:
-        if self.__shuffle_pdf_navigator.get_is_page_navigator_active():
+        if self.get_is_page_navigator_active():
             self.__get_next_card_button().setDisabled(True)
             self.__is_next_card_button_disabled = True
         elif self.__current_card_index == self.__get_num_cards() - 1 and isinstance(
-            self.__get_cards_to_display()[self.__current_card_index], Flashcard
+            self.get_cards_to_display()[self.__current_card_index], Flashcard
         ):
             # if the last element is a flashcard and it is currently visualized a question, then the next card is the corresponding answer
-            flashcard: Flashcard = self.__get_cards_to_display()[
+            flashcard: Flashcard = self.get_cards_to_display()[
                 self.__current_card_index
             ]
             if flashcard.get_question() == self.__get_flashcard_label_text():
@@ -538,7 +549,7 @@ def is_a_flashcard_next(
 def merge_cards_shuffle(
     flashcards_per_page: dict[int, list[Flashcard]], num_pdf_pages: int
 ) -> tuple[list[Card], list[int], list[int]]:
-    """It shuffles the flashcards and it merges it with the corresponding pdf pages. The pdf pages that are not referenced by any flashcards are positioned at the end.
+    """It shuffles the untested flashcards and it merges it with the corresponding pdf pages. The pdf pages that are not referenced by any flashcards are positioned at the end.
 
     The result is saved in a list that matches the visualization outcome.
 
@@ -593,7 +604,13 @@ def merge_cards_shuffle(
 def get_shuffled_flashcards(flashcards_per_page) -> list[Flashcard]:
     flashcards: list[Flashcard] = get_flashcards_list(flashcards_per_page)
     shuffle(flashcards)
-    return flashcards
+    # add not_done flashcards
+    filtered_flashcards: list[Flashcard] = [
+        flashcard
+        for flashcard in flashcards
+        if flashcard.get_current_result() == Flashcard.Result.NOT_DONE
+    ]
+    return filtered_flashcards
 
 
 def get_flashcards_list(flashcards_per_page) -> list[Flashcard]:

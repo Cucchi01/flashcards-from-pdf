@@ -5,11 +5,12 @@ import os
 
 from pdf_visualization.pdf_visualization_layout import PDFWindowVisualizationLayout
 from pdf_visualization.cards_navigator import (
-    CardNavigator,
+    CardsNavigator,
     merge_cards_shuffle,
     merge_cards_ordered,
 )
 from pdf_visualization.right_panel_manager import RightPanelManager
+from test_management.test_manager import TestManager
 from pdf_visualization.advanced_widget_layout import AdvancedOptionsLayout
 from pdf_visualization.advanced_widget_model import AdvancedOptionsModel
 from pdf_visualization.advanced_widget_control import AdvancedOptionsControl
@@ -30,7 +31,7 @@ class PDFWindowVisualizationModel:
 
         if not is_flashcards_file_present:
             with open(path_of_flashcards, "w", encoding="utf-8") as file:
-                file.write("0\n0\n0\n")
+                file.write("0\n1\n0\n")
 
         self.__path_of_pdf: str = path_of_pdf
         self.__filename: str = os.path.basename(path_of_pdf)
@@ -58,12 +59,13 @@ class PDFWindowVisualizationModel:
         ) = merge_cards_ordered(self.__flashcards_from_pdf_page, self.__num_pdf_pages)
         self.__is_deck_ordered: bool = True
 
-        self.__cards_navigator: CardNavigator = CardNavigator(self)
+        self.__cards_navigator: CardsNavigator = CardsNavigator(self)
         self.__flashcard_manager: RightPanelManager = RightPanelManager(self)
 
         self.__window_layout: PDFWindowVisualizationLayout = (
             PDFWindowVisualizationLayout(self.__filename, self.__num_pdf_pages)
         )
+        self.__test_manager: TestManager = TestManager(self, self.__window_layout)
 
         self.__advanced_controls_widget_layout: AdvancedOptionsLayout
         self.__advanced_controls_widget_control: AdvancedOptionsControl
@@ -93,7 +95,7 @@ class PDFWindowVisualizationModel:
     def get_is_deck_ordered(self) -> bool:
         return self.__is_deck_ordered
 
-    def get_cards_navigator(self) -> CardNavigator:
+    def get_cards_navigator(self) -> CardsNavigator:
         return self.__cards_navigator
 
     def get_previous_page_button(self) -> QPushButton:
@@ -146,6 +148,12 @@ class PDFWindowVisualizationModel:
 
     def get_next_card_button(self) -> QPushButton:
         return self.__window_layout.get_next_card_button()
+
+    def get_test_manager(self) -> TestManager:
+        return self.__test_manager
+
+    def get_pdf_tests_info(self) -> PDFTestsInfo:
+        return self.__io_flashcards_info
 
     def __update_invalid_page_references(
         self, flashcards: dict[int, list[Flashcard]], num_pdf_pages: int

@@ -5,13 +5,13 @@ from PIL import Image as PILImage
 from io import TextIOWrapper
 from typing import overload
 import os
-from datetime import date
+from datetime import datetime, date
 from random import randint
 
 from flashcard.flashcard import Flashcard
 from test_management.pdf_test_info import PDFTestsInfo
 from application_constants import TYPE_QUEST_PAGE_SPECIFIC_CONSTANT
-from application_constants import ONGOING_TEST_FLAG_YES
+from application_constants import FIRST_PASS_TEST_FLAG_YES
 from application_constants import NO_ANSWER_FLAG
 from application_constants import FILE_FLASHCARDS_SEPARATOR
 from application_constants import ANKI_FLASHCARDS_SEPARATOR
@@ -24,15 +24,17 @@ class IOFlashcards:
         pdf_test_info: PDFTestsInfo = PDFTestsInfo()
         with open(path_of_file, "r", encoding="utf-8") as file:
             num_test: int = int(file.readline())
-            pdf_test_info.set_num_completed_tests(num_test)
             for i in range(0, num_test):
                 fields: list[str] = file.readline().split(FILE_FLASHCARDS_SEPARATOR)
-                pdf_test_info.add_completed_test(fields[0].strip(), float(fields[1]))
+                pdf_test_info.add_completed_test(
+                    datetime.strptime(fields[0].strip(), "%Y/%m/%d_%H:%M:%S"),
+                    float(fields[1]),
+                )
 
-            if int(file.readline()) == PDFTestsInfo.OngoingTestState.YES.value:
-                pdf_test_info.set_ongoing_test_flag(PDFTestsInfo.OngoingTestState.YES)
+            if int(file.readline()) == PDFTestsInfo.FirstPass.TRUE.value:
+                pdf_test_info.set_first_pass_flag(PDFTestsInfo.FirstPass.TRUE)
             else:
-                pdf_test_info.set_ongoing_test_flag(PDFTestsInfo.OngoingTestState.NO)
+                pdf_test_info.set_first_pass_flag(PDFTestsInfo.FirstPass.FALSE)
 
         return pdf_test_info
 
@@ -45,10 +47,9 @@ class IOFlashcards:
             IOFlashcards.__skip_history_tests(file)
 
             # check ongoing test
-            # TODO: manage ongoing test
-            ongoing_test: bool = False
-            if file.readline().strip() == ONGOING_TEST_FLAG_YES:
-                ongoing_test = True
+            first_pass: bool = False
+            if file.readline().strip() == FIRST_PASS_TEST_FLAG_YES:
+                first_pass = True
 
             num_col: int = -1
             num_flashcards: int = int(file.readline())
@@ -66,9 +67,7 @@ class IOFlashcards:
                 for word in line.split(FILE_FLASHCARDS_SEPARATOR):
                     num_col += 1
 
-                    IOFlashcards.__manage_flashcard_field(
-                        num_col, word, quest, ongoing_test
-                    )
+                    IOFlashcards.__manage_flashcard_field(num_col, word, quest)
 
                 line = ""
 
@@ -90,7 +89,7 @@ class IOFlashcards:
 
     @staticmethod
     def __manage_flashcard_field(
-        num_col: int, string: str, flashcard: Flashcard, ongoing_test: bool
+        num_col: int, string: str, flashcard: Flashcard
     ) -> None:
         string = string.strip()
         match num_col:
@@ -125,23 +124,23 @@ class IOFlashcards:
                     if char == "1":
                         results.append(Flashcard.Result.NOT_DONE)
                     elif char == "0":
-                        results.append(Flashcard.Result.ERROR)
+                        results.append(Flashcard.Result.STILL_LEARNING)
                     else:
-                        results.append(Flashcard.Result.TRUE)
+                        results.append(Flashcard.Result.KNOW)
 
                 flashcard.set_past_results(results)
 
             case 5:
                 # current result
                 current_result: Flashcard.Result = Flashcard.Result.NOT_DONE
-                if string != "" and ongoing_test:
+                if string != "":
                     match int(string):
-                        case Flashcard.Result.ERROR.value:
-                            current_result = Flashcard.Result.ERROR
+                        case Flashcard.Result.STILL_LEARNING.value:
+                            current_result = Flashcard.Result.STILL_LEARNING
                         case Flashcard.Result.NOT_DONE.value:
                             current_result = Flashcard.Result.NOT_DONE
-                        case Flashcard.Result.TRUE.value:
-                            current_result = Flashcard.Result.TRUE
+                        case Flashcard.Result.KNOW.value:
+                            current_result = Flashcard.Result.KNOW
 
                 flashcard.set_current_result(current_result)
 

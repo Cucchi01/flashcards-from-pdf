@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 # always false at running time. It is used for mypy typing check and avoiding circular imports
 if TYPE_CHECKING:
     from pdf_visualization.pdf_visualization_model import PDFWindowVisualizationModel
-    from pdf_visualization.cards_navigator import CardNavigator
+    from pdf_visualization.cards_navigator import CardsNavigator
 from flashcard.flashcard import Flashcard
 from flashcard.pdf_page import PdfPage
 from flashcard.card import Card
@@ -101,6 +101,10 @@ class RightPanelManager:
         index_in_list: int = self.__get_index_list_position()
 
         self.__add_flashcard_at_index(flashcard, index_in_list)
+
+        self.__pdf_visualization_model.refresh_merged_cards(
+            self.__get_is_deck_ordered()
+        )
 
         self.__get_cards_navigator().set_current_card_index(
             self.__get_current_card_index() + 1
@@ -207,10 +211,6 @@ class RightPanelManager:
                 flashcard
             ]
 
-        self.__pdf_visualization_model.refresh_merged_cards(
-            self.__get_is_deck_ordered()
-        )
-
     def remove_current_flashcard(self) -> None:
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         card: Card = self.__get_cards_to_display()[self.__get_current_card_index()]
@@ -234,7 +234,7 @@ class RightPanelManager:
         )
         QApplication.restoreOverrideCursor()
 
-    def __get_cards_navigator(self) -> "CardNavigator":
+    def __get_cards_navigator(self) -> "CardsNavigator":
         return self.__pdf_visualization_model.get_cards_navigator()
 
     def __get_is_deck_ordered(self) -> bool:

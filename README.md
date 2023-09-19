@@ -12,12 +12,16 @@ The last but one field contains n digits that are the outcome of the previous re
 Finally there is the result of the ongoing test. If there is no ongoing test this field should be not considered.
 
 num_completed_tests  
-date1_completed ?^? percentage_correct_first_try ?^?  
-date2_completed ?^? percentage_correct_first_try ?^?  
+datetime1_completed ?^? percentage_correct_first_try ?^?  
+datetime2_completed ?^? percentage_correct_first_try ?^?  
 ....  
-ongoing_test_flag['0'=no|'1'=yes]  
+first_pass_flag['0'=false|'1'=true]  
 num_questions  
 num_page ?^? questions ?^? answer['!-!'= no answer] ?^? type['g'=general|'p'=page_specific] ?^? 100 ?^? ongoing_test_result['0'=mistake|'1'=not_done|'2'=correct][optional]?^?
+
+The datetimes are saved in the "yyyy/mm/dd_HH:MM:SS" format.
+Only the first pass result is saved as a completed task. So if there are 10 flashcards and in the first trial you complete 6 of those, it is going to be save 0.6. Then the flashcards that were not completed the first time will be visualized again until all of them are responded correctly, but these results will not be saved.
+Afterwards there is the possibility to start a new test and the first result will be saved again.
 
 The reference page index is in 1-based format, because in this way a user can read a txt file and make sense if it. Sometimes this software is not available, but it can read the txt file. In the codebase the index of a pdf page is saved and used in 0-based format.  
 There is always a +1 in the visualizazion process. So in the txt a generic page has as index -1 and internally it is store -2.

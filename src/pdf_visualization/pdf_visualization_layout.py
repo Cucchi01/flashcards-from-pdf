@@ -57,8 +57,8 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__next_flashcard_button: QPushButton
         self.__is_back_card_button_disabled: bool = True
         self.__is_next_card_button_disabled: bool = False
-        self.__mistake_button: QPushButton
-        self.__correct_button: QPushButton
+        self.__still_learning_button: QPushButton
+        self.__know_button: QPushButton
 
         self.__set_window_style()
         self.__set_window_layout()
@@ -252,31 +252,30 @@ class PDFWindowVisualizationLayout(QWidget):
         return layout_current_card
 
     def __set_current_flashcard_bottom_layout(self) -> QHBoxLayout:
-        # TODO: manage correct and mistake answers
         layout_current_card = QHBoxLayout()
 
-        self.__mistake_button = QPushButton()
-        self.__mistake_button.setText("Still Learning")
-        self.__mistake_button.setDisabled(True)
-        self.__mistake_button.setStyleSheet(
+        self.__still_learning_button = QPushButton()
+        self.__still_learning_button.setText("Still Learning")
+        self.__still_learning_button.setDisabled(True)
+        self.__still_learning_button.setStyleSheet(
             """
             QPushButton {background-color: #C70039; padding:2.495px; border: 0.5px solid #bfbfbf;}
             QPushButton:disabled {background-color: #CCCCCC; padding:2.495px; border: 0.5px solid #bfbfbf;}
             """
         )
 
-        self.__correct_button = QPushButton()
-        self.__correct_button.setText("Know")
-        self.__correct_button.setDisabled(True)
-        self.__correct_button.setStyleSheet(
+        self.__know_button = QPushButton()
+        self.__know_button.setText("Know")
+        self.__know_button.setDisabled(True)
+        self.__know_button.setStyleSheet(
             """
             QPushButton {background-color: #82CD47; padding:2.495px; border: 0.5px solid #bfbfbf;}
             QPushButton:disabled {background-color: #CCCCCC; padding:2.495px; border: 0.5px solid #bfbfbf;}
             """
         )
 
-        layout_current_card.addWidget(self.__mistake_button)
-        layout_current_card.addWidget(self.__correct_button)
+        layout_current_card.addWidget(self.__still_learning_button)
+        layout_current_card.addWidget(self.__know_button)
 
         return layout_current_card
 
@@ -349,3 +348,9 @@ class PDFWindowVisualizationLayout(QWidget):
 
     def get_cancel_modification_flashcard_button(self) -> QPushButton:
         return self.__cancel_modification_flashcard_button
+
+    def get_still_learning_button(self) -> QPushButton:
+        return self.__still_learning_button
+
+    def get_know_button(self) -> QPushButton:
+        return self.__know_button

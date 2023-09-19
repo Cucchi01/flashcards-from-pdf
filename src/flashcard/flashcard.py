@@ -19,9 +19,9 @@ class Flashcard(Card):
                 return "g"
 
     class Result(Enum):
-        ERROR = 0
+        STILL_LEARNING = 0
         NOT_DONE = 1
-        TRUE = 2
+        KNOW = 2
 
         def to_string(self) -> str:
             return str(self.value)

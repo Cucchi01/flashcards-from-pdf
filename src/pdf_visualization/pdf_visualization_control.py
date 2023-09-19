@@ -27,6 +27,8 @@ class PDFWindowVisualizationControl:
         self.__shortcut_next_card: QShortcut
         self.__shortcut_previous_flashcard: QShortcut
         self.__shortcut_next_flashcard: QShortcut
+        self.__shortcut_know: QShortcut
+        self.__shortcut_stil_learning: QShortcut
 
         # change the CursorShape while loading the pdf
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
@@ -199,7 +201,6 @@ class PDFWindowVisualizationControl:
         self.__shortcut_next_card.activated.connect(self.__pdf_window_model.next_card)
 
     def __set_controls_current_flashcard_bottom_layout(self) -> None:
-        # TODO: manage correct and mistake answers
         self.__pdf_window_layout.get_previous_flashcard_button().clicked.connect(
             self.__pdf_window_model.previous_flashcard
         )
@@ -220,4 +221,22 @@ class PDFWindowVisualizationControl:
         )
         self.__shortcut_next_flashcard.activated.connect(
             self.__pdf_window_model.next_flashcard
+        )
+
+        self.__pdf_window_layout.get_still_learning_button().clicked.connect(
+            self.__pdf_window_model.get_test_manager().still_learning_answer
+        )
+        self.__shortcut_stil_learning = QShortcut(
+            QKeySequence("1"), self.__pdf_window_layout
+        )
+        self.__shortcut_stil_learning.activated.connect(
+            self.__pdf_window_model.get_test_manager().still_learning_answer
+        )
+
+        self.__pdf_window_layout.get_know_button().clicked.connect(
+            self.__pdf_window_model.get_test_manager().know_answer
+        )
+        self.__shortcut_know = QShortcut(QKeySequence("2"), self.__pdf_window_layout)
+        self.__shortcut_know.activated.connect(
+            self.__pdf_window_model.get_test_manager().know_answer
         )
