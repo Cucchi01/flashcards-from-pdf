@@ -149,7 +149,8 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__flashcard_label.setVisible(False)
         self.__flashcard_label.setText("")
         self.__flashcard_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.__flashcard_label.setFont(QFont("Calisto MT", 30))
+        self.__flashcard_label.setFont(QFont("Calisto MT", 26))
+        self.__flashcard_label.setWordWrap(True)
 
         self.__pdf_view = QtPdfWidgets.QPdfView(self)
         self.__pdf_view.setPageMode(QtPdfWidgets.QPdfView.PageMode.SinglePage)
