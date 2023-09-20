@@ -2,6 +2,7 @@ from PyQt6.QtGui import QFont
 
 import os
 from io import TextIOWrapper
+import logging
 
 APPLICATION_NAME: str = "Flashcards from PDF"
 PATH_TO_DECKS_FROM_SRC: str = "../data/"
@@ -13,6 +14,13 @@ if os.path.exists(PATH_TO_DECKS_ABS) == False:
     PATH_TO_DECKS_ABS = os.path.abspath(
         os.path.join(os.path.dirname(__file__), PATH_TO_DECKS_FROM_SRC)
     )
+
+PRIVATE_LOG_FILE: str = "private_log_file.txt"
+APPLICATION_LOG_PATH: str = os.path.join(PATH_TO_DECKS_ABS, PRIVATE_LOG_FILE)
+logging.basicConfig(
+    filename=APPLICATION_LOG_PATH, encoding="utf-8", level=logging.ERROR
+)
+
 BASE_HOME_WIDTH: int = 800
 BASE_HOME_HEIGHT: int = 600
 # TODO: make it choose the right language for the pdf
@@ -50,4 +58,5 @@ HIDDEN_ROOT_ENTRIES: list[str] = [
     PRIVATE_FILE_WITH_PDFS_DIRECTORY,
     "Anki",
     PRIVATE_DB_FILENAME,
+    PRIVATE_LOG_FILE,
 ]

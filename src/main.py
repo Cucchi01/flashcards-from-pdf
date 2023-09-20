@@ -23,6 +23,7 @@ from application_constants import (
     PRIVATE_DB_FILENAME,
     DB_START_TIMESTAMP_TYPE,
     DB_END_TIMESTAMP_TYPE,
+    APPLICATION_LOG_PATH,
 )
 from decks_tree import DecksStructure
 from statistics.statistics import get_statistics, create_table_timestamp
@@ -31,6 +32,8 @@ import sys
 import sqlite3
 import os
 from datetime import datetime
+import logging
+import traceback
 
 
 class MainWindow(QWidget):
@@ -133,15 +136,21 @@ def __insert_timestamp(
     con.commit()
 
 
+def __write_error_log(exc: Exception) -> None:
+    logging.error(traceback.format_exc())
+
+
 if __name__ == "__main__":
     add_new_start_timestamp()
-    exit_code: int = 1
+    exit_code: int = 0
     try:
         app = QApplication(sys.argv)
         app.setStyleSheet(APPLICATION_STYLE)
         app.setFont(FONT)
         window = MainWindow()
         exit_code = app.exec()
+    except Exception as exc:
+        __write_error_log(exc)
     finally:
         add_new_end_timestamp()
 
