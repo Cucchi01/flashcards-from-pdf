@@ -25,6 +25,7 @@ from application_constants import (
     DB_END_TIMESTAMP_TYPE,
 )
 from decks_tree import DecksStructure
+from statistics.statistics import get_statistics, create_table_timestamp
 
 import sys
 import sqlite3
@@ -92,6 +93,7 @@ class MainWindow(QWidget):
         layout = QVBoxLayout()
         label = QLabel(self)
         label.setText("Work in progress...")
+        layout.addWidget(get_statistics())
         layout.addWidget(label)
         stats_page.setLayout(layout)
         return stats_page
@@ -105,29 +107,30 @@ def add_new_end_timestamp() -> None:
     add_time_stamp(DB_END_TIMESTAMP_TYPE)
 
 
-def add_time_stamp(type: str) -> None:
+def add_time_stamp(type_ins: str) -> None:
     try:
-        con = sqlite3.connect(os.path.join(PATH_TO_DECKS_ABS, PRIVATE_DB_FILENAME))
-        cur = con.cursor()
-        res = cur.execute("SELECT * FROM sqlite_master where name='timestamp'")
-        if res.fetchone() is None:
-            cur.execute(
-                """CREATE TABLE timestamp (id integer primary key autoincrement ,
-                                        timestamp timestamp NOT NULL,
-                                        type varchar(1))"""
-            )
-
-        insert_query = """INSERT INTO 'timestamp'
-                            ('timestamp', 'type') 
-                            VALUES (?, ?);"""
-
-        data_insert = (datetime.now(), type)
-        cur.execute(insert_query, data_insert)
-        con.commit()
+        con: sqlite3.Connection = sqlite3.connect(
+            os.path.join(PATH_TO_DECKS_ABS, PRIVATE_DB_FILENAME)
+        )
+        cur: sqlite3.Cursor = con.cursor()
+        create_table_timestamp(cur)
+        __insert_timestamp(con, cur, type_ins)
         cur.close()
     finally:
         if con:
             con.close()
+
+
+def __insert_timestamp(
+    con: sqlite3.Connection, cur: sqlite3.Cursor, type_ins: str
+) -> None:
+    insert_query = """INSERT INTO 'timestamp'
+                            ('timestamp', 'type') 
+                            VALUES (?, ?);"""
+
+    data_insert = (datetime.now(), type_ins)
+    cur.execute(insert_query, data_insert)
+    con.commit()
 
 
 if __name__ == "__main__":
