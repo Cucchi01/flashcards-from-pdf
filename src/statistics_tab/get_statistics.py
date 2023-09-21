@@ -7,13 +7,13 @@ import numpy as np
 import sqlite3
 import os
 
-from statistics.heatmap_model import HeatmapModel
+import statistics_tab.heatmap_model as hm
 from application_constants import PRIVATE_DB_FILENAME, PATH_TO_DECKS_ABS
 
 
 def get_statistics() -> QTableView:
     heatmap: QTableView = QTableView()
-    heatmap_model: HeatmapModel
+    heatmap_model: hm.HeatmapModel
     try:
         con = sqlite3.connect(os.path.join(PATH_TO_DECKS_ABS, PRIVATE_DB_FILENAME))
         cur = con.cursor()
@@ -23,7 +23,7 @@ def get_statistics() -> QTableView:
         df: pd.DataFrame = __get_timestamps_from_db(con)
         heatmap_data: pd.DataFrame = __get_heatmap_data(df)
 
-        heatmap_model = HeatmapModel(heatmap_data)
+        heatmap_model = hm.HeatmapModel(heatmap_data)
         heatmap.setModel(heatmap_model)
 
         cur.close()

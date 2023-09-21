@@ -26,7 +26,7 @@ from application_constants import (
     APPLICATION_LOG_PATH,
 )
 from decks_tree import DecksStructure
-from statistics.statistics import get_statistics, create_table_timestamp
+from statistics_tab.get_statistics import get_statistics, create_table_timestamp
 
 import sys
 import sqlite3
