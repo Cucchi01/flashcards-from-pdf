@@ -131,11 +131,9 @@ class DecksStructure(QTreeWidget):
         )
         update_button.triggered.connect(self.__update_file)
 
-        export_anki_button = QAction(
-            "Export flashcards to Anki", self.__menu_right_click
-        )
+        export_anki_button = QAction("Export to txt", self.__menu_right_click)
         export_anki_button.setStatusTip(
-            "Exports the flashcards made on this PDF to Anki"
+            "Creates the txt file that should be used to import the flashcards in Anki"
         )
         export_anki_button.triggered.connect(self.__export_to_anki)
 
