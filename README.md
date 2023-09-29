@@ -52,6 +52,20 @@ The `.txt` files that are created in the `data/` folder contain the flashcards, 
 | Ctrl+Left arrow  | Previous flashcard                                  |
 | Ctrl+Right arrow | Next flashcard                                      |
 
+## Requirements
+
+Tested with:
+
+-   Python 3.10.12
+-   matplotlib 3.7.2
+-   numpy 1.25.2
+-   pandas 2.0.3
+-   scikit-learn 1.3.0
+-   pyqt6 6.5.2
+-   poppler 22.12.0
+-   pdf2image 1.16.3
+-   pyinstaller 5.6.2
+
 ## Technical details
 
 The `.txt` files that contain the questions are formatted in this way:  
