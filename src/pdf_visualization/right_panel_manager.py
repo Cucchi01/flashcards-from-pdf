@@ -249,14 +249,18 @@ class RightPanelManager:
     def __get_page_flashcard_button(self) -> QPushButton:
         return self.__pdf_visualization_model.get_page_flashcard_button()
 
-    def update_add_generic_flashcard_button(self) -> None:
+    def update_add_generic_flashcard_beginning_button(self) -> None:
         if self.get_is_flashcard_being_modified() == True:
-            self.__get_generic_flashcard_button().setText("Modify generic flashcard")
+            self.__get_generic_flashcard_beginning_button().setText(
+                "Modify generic flashcard at the beginning"
+            )
         else:
-            self.__get_generic_flashcard_button().setText("Add generic flashcard")
+            self.__get_generic_flashcard_beginning_button().setText(
+                "Add generic flashcard at the beginning"
+            )
 
-    def __get_generic_flashcard_button(self) -> QPushButton:
-        return self.__pdf_visualization_model.get_generic_flashcard_button()
+    def __get_generic_flashcard_beginning_button(self) -> QPushButton:
+        return self.__pdf_visualization_model.get_generic_flashcard_beginning_button()
 
     def update_remove_flashcard_button(self) -> None:
         if isinstance(

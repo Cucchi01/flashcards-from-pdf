@@ -141,7 +141,7 @@ class PDFWindowVisualizationControl:
             )
         )
 
-        self.__pdf_window_layout.get_generic_flashcard_button().clicked.connect(
+        self.__pdf_window_layout.get_generic_flashcard_beginning_button().clicked.connect(
             partial(
                 self.__pdf_window_model.manage_page_button_flashcard, flag_generic=True
             )
