@@ -20,6 +20,7 @@ class PDFWindowVisualizationControl:
     def __init__(self, path_of_pdf: str) -> None:
         super().__init__()
 
+        self.__shortcut_search_flashcard: QShortcut
         self.__shortcut_spin_box_focus: QShortcut
         self.__shortcut_advanced_options_focus: QShortcut
         self.__shortcut_previous_page: QShortcut
@@ -57,10 +58,19 @@ class PDFWindowVisualizationControl:
         return self.__pdf_window_layout
 
     def __set_controls_window_layout(self) -> None:
+        self.__set_controls_shortcut_without_btn()
         self.__set_controls_header_widget()
         self.__set_controls_left_panel_widget()
         self.__set_controls_right_panel_widget()
         self.__set_controls_bottom_widget()
+
+    def __set_controls_shortcut_without_btn(self) -> None:
+        self.__shortcut_search_flashcard = QShortcut(
+            QKeySequence("Ctrl+F"), self.__pdf_window_layout
+        )
+        self.__shortcut_search_flashcard.activated.connect(
+            self.__pdf_window_model.search_flashcard
+        )
 
     def __set_controls_header_widget(self) -> None:
         # header

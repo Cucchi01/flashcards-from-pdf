@@ -22,6 +22,11 @@ from test_management.test_manager import TestManager
 from pdf_visualization.advanced_widget_layout import AdvancedOptionsLayout
 from pdf_visualization.advanced_widget_model import AdvancedOptionsModel
 from pdf_visualization.advanced_widget_control import AdvancedOptionsControl
+
+from pdf_visualization.search.search_flashcard_control import SearchFlashcardControl
+from pdf_visualization.search.search_flashcard_layout import SearchFlashcardLayout
+from pdf_visualization.search.search_flashcard_model import SearchFlashcardModel
+
 from flashcard.flashcard import Flashcard
 from flashcard.pdf_page import PdfPage
 from flashcard.card import Card
@@ -78,6 +83,10 @@ class PDFWindowVisualizationModel:
         self.__advanced_controls_widget_layout: AdvancedOptionsLayout
         self.__advanced_controls_widget_control: AdvancedOptionsControl
         self.__advanced_controls_widget_model: AdvancedOptionsModel
+
+        self.__search_flashcard_widget_layout: SearchFlashcardLayout
+        self.__search_flashcard_widget_model: SearchFlashcardControl
+        self.__search_flashcard_widget_control: SearchFlashcardModel
 
         self.__setup_window_layout()
         self.set_current_card_index(0)
@@ -204,6 +213,7 @@ class PDFWindowVisualizationModel:
             self.__window_layout.get_shuffle_button().setText("Shuffle")
             self.__window_layout.get_pdf_page_num_spinbox().setDisabled(False)
         else:
+            self.__close_search_widget()
             self.__shuffle_cards()
             self.__window_layout.get_shuffle_button().setText("Order")
             self.__window_layout.get_pdf_page_num_spinbox().setDisabled(True)
@@ -214,6 +224,10 @@ class PDFWindowVisualizationModel:
         self.refresh_merged_cards(ordered_deck=True)
         self.__is_deck_ordered = True
         self.__cards_navigator.restart_visualization()
+
+    def __close_search_widget(self) -> None:
+        if self.__search_flashcard_widget_layout is not None:
+            self.__search_flashcard_widget_layout.hide()
 
     def __shuffle_cards(self) -> None:
         self.refresh_merged_cards(ordered_deck=False)
@@ -271,6 +285,20 @@ class PDFWindowVisualizationModel:
             self.__advanced_controls_widget_model,
         )
         self.__advanced_controls_widget_layout.show()
+
+    def search_flashcard(self) -> None:
+        if self.get_is_deck_ordered() == False:
+            # no search on shuffle mode
+            return
+        self.__search_flashcard_widget_layout = SearchFlashcardLayout()
+        self.__search_flashcard_widget_model = SearchFlashcardModel(
+            self.__search_flashcard_widget_layout, self, self.get_current_card_index()
+        )
+        self.__search_flashcard_widget_control = SearchFlashcardControl(
+            self.__search_flashcard_widget_layout,
+            self.__search_flashcard_widget_model,
+        )
+        self.__search_flashcard_widget_layout.show()
 
     def previous_page(self) -> None:
         self.__cards_navigator.previous_page()
