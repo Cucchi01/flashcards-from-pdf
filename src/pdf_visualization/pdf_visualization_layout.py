@@ -53,7 +53,7 @@ class PDFWindowVisualizationLayout(QWidget):
         # right panel
         self.__question_input: QPlainTextEdit
         self.__answer_input: QPlainTextEdit
-        self.__page_specific_checkbox: QCheckBox
+        self.__include_pdf_page_checkbox: QCheckBox
         self.__add_page_flashcard_button: QPushButton
         self.__add_generic_flashcard_beginning_button: QPushButton
         self.__remove_flashcard_button: QPushButton
@@ -190,14 +190,14 @@ class PDFWindowVisualizationLayout(QWidget):
         self.__answer_input = QPlainTextEdit("")
         self.__answer_input.setTabChangesFocus(True)
         answer_label = QLabel("Answer:")
-        self.__page_specific_checkbox = QCheckBox("Include pdf page")
-        self.__page_specific_checkbox.setChecked(True)
+        self.__include_pdf_page_checkbox = QCheckBox("Include pdf page")
+        self.__include_pdf_page_checkbox.setChecked(True)
 
         layout.addWidget(question_label)
         layout.addWidget(self.__question_input)
         layout.addWidget(answer_label)
         layout.addWidget(self.__answer_input)
-        layout.addWidget(self.__page_specific_checkbox)
+        layout.addWidget(self.__include_pdf_page_checkbox)
         self.__add_flashcard_buttons(layout)
 
         bottom.setLayout(layout)
@@ -359,8 +359,8 @@ class PDFWindowVisualizationLayout(QWidget):
     def get_input_text_answer(self) -> QPlainTextEdit:
         return self.__answer_input
 
-    def get_page_specific_checkbox(self) -> QCheckBox:
-        return self.__page_specific_checkbox
+    def get_include_pdf_page_checkbox(self) -> QCheckBox:
+        return self.__include_pdf_page_checkbox
 
     def get_page_flashcard_button(self) -> QPushButton:
         return self.__add_page_flashcard_button

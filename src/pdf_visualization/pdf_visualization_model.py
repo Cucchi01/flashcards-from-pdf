@@ -136,8 +136,8 @@ class PDFWindowVisualizationModel:
     def get_generic_flashcard_beginning_button(self) -> QPushButton:
         return self.__window_layout.get_generic_flashcard_beginning_button()
 
-    def get_page_specific_checkbox(self) -> QCheckBox:
-        return self.__window_layout.get_page_specific_checkbox()
+    def get_include_pdf_page_checkbox(self) -> QCheckBox:
+        return self.__window_layout.get_include_pdf_page_checkbox()
 
     def get_remove_flashcard_button(self) -> QPushButton:
         return self.__window_layout.get_remove_flashcard_button()
@@ -338,6 +338,10 @@ class PDFWindowVisualizationModel:
 
     def manage_page_button_flashcard(self, flag_generic: bool = False) -> None:
         self.__flashcard_manager.manage_page_button_flashcard(flag_generic)
+
+    def add_flashcard_without_pdf_page(self) -> None:
+        self.get_include_pdf_page_checkbox().setChecked(False)
+        self.manage_page_button_flashcard(False)
 
     def remove_current_flashcard(self) -> None:
         self.__flashcard_manager.remove_current_flashcard()

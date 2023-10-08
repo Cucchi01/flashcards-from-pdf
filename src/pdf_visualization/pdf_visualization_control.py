@@ -26,6 +26,7 @@ class PDFWindowVisualizationControl:
         self.__shortcut_next_page: QShortcut
         self.__shortcut_zoom_increase: QShortcut
         self.__shortcut_zoom_decrease: QShortcut
+        self.__shortcut_add_flashcard_without_pdf_page: QShortcut
         self.__shortcut_modify_current_flashcard: QShortcut
         self.__shortcut_focus_question_field: QShortcut
         self.__shortcut_manage_page_button_flashcard_s: QShortcut
@@ -211,6 +212,13 @@ class PDFWindowVisualizationControl:
         )
         self.__shortcut_cancel_current_flashcard_modification.activated.connect(
             self.__pdf_window_model.cancel_current_flashcard_modification
+        )
+
+        self.__shortcut_add_flashcard_without_pdf_page = QShortcut(
+            QKeySequence("Alt+Return"), self.__pdf_window_layout
+        )
+        self.__shortcut_add_flashcard_without_pdf_page.activated.connect(
+            self.__pdf_window_model.add_flashcard_without_pdf_page
         )
 
     def __set_controls_bottom_widget(self) -> None:

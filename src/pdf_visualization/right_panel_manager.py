@@ -162,7 +162,7 @@ class RightPanelManager:
         return self.__pdf_visualization_model.get_input_text_answer()
 
     def __get_page_specific_checkbox(self) -> QCheckBox:
-        return self.__pdf_visualization_model.get_page_specific_checkbox()
+        return self.__pdf_visualization_model.get_include_pdf_page_checkbox()
 
     def __get_index_list_position(self) -> int:
         current_card: Card = self.__get_cards_to_display()[

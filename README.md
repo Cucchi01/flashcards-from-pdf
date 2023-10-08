@@ -56,24 +56,25 @@ These files are: `private_log_file.txt`, `private_folder_anki.txt`, `private_pdf
 
 ## Shortcuts
 
-| Shortcut                   | Action                                              |
-| -------------------------- | --------------------------------------------------- |
-| Ctrl++                     | Zoom in PDF                                         |
-| Ctrl+-                     | Zoom out PDF                                        |
-| Ctrl+G                     | Focus on spinbox                                    |
-| Ctrl+Q                     | Focus on advanced options                           |
-| Ctrl+E                     | Edit current flashcard                              |
-| Ctrl+A                     | Focus on question text input(A = Add new flashcard) |
-| Ctrl+S / Ctrl+Return       | Add/modify flashcard                                |
-| Ctrl+Shift+S / Ctrl+Return | Add/modify generic flashcard                        |
-| Ctrl+D                     | Remove current flashcard (D = delete)               |
-| Ctrl+R                     | Cancel current flashcard (R = Redo)                 |
-| Up arrow                   | Previous page                                       |
-| Down arrow                 | Next page                                           |
-| Left arrow                 | Previous card                                       |
-| Right arrow                | Next card                                           |
-| Ctrl+Left arrow            | Previous flashcard                                  |
-| Ctrl+Right arrow           | Next flashcard                                      |
+| Shortcut                   | Action                                                  |
+| -------------------------- | ------------------------------------------------------- |
+| Ctrl++                     | Zoom in PDF                                             |
+| Ctrl+-                     | Zoom out PDF                                            |
+| Ctrl+G                     | Focus on spinbox                                        |
+| Ctrl+Q                     | Focus on advanced options(doesn't work in shuffle mode) |
+| Ctrl+E                     | Edit current flashcard                                  |
+| Ctrl+A                     | Focus on question text input(A = Add new flashcard)     |
+| Ctrl+S / Ctrl+Return       | Add/modify flashcard                                    |
+| Alt+Return                 | Add flashcard without including the pdf page            |
+| Ctrl+Shift+S / Ctrl+Return | Add/modify generic flashcard                            |
+| Ctrl+D                     | Remove current flashcard (D = delete)                   |
+| Ctrl+R                     | Cancel current flashcard (R = Redo)                     |
+| Up arrow                   | Previous page                                           |
+| Down arrow                 | Next page                                               |
+| Left arrow                 | Previous card                                           |
+| Right arrow                | Next card                                               |
+| Ctrl+Left arrow            | Previous flashcard                                      |
+| Ctrl+Right arrow           | Next flashcard                                          |
 
 ## Requirements
 
