@@ -48,6 +48,7 @@ class RightPanelManager:
 
         self.__pdf_visualization_model.save_flashcards_to_file()
         self.clear_input_fields()
+        self.__pdf_visualization_model.focus_advanced_options()
         QApplication.restoreOverrideCursor()
 
     def __modify_flashcard(self, flag_generic: bool) -> None:
