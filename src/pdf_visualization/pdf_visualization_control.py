@@ -21,6 +21,7 @@ class PDFWindowVisualizationControl:
         super().__init__()
 
         self.__shortcut_spin_box_focus: QShortcut
+        self.__shortcut_advanced_options_focus: QShortcut
         self.__shortcut_previous_page: QShortcut
         self.__shortcut_next_page: QShortcut
         self.__shortcut_zoom_increase: QShortcut
@@ -69,11 +70,20 @@ class PDFWindowVisualizationControl:
             self.__pdf_window_model.restart_test_pressed
         )
 
+        self.__set_controls_advanced_options()
+        self.__set_controls_page_position_layout()
+
+    def __set_controls_advanced_options(self) -> None:
         self.__pdf_window_layout.get_advanced_options_button().clicked.connect(
             self.__pdf_window_model.advanced_options_button_pressed
         )
 
-        self.__set_controls_page_position_layout()
+        self.__shortcut_advanced_options_focus = QShortcut(
+            QKeySequence("Ctrl+Q"), self.__pdf_window_layout
+        )
+        self.__shortcut_advanced_options_focus.activated.connect(
+            self.__pdf_window_model.focus_advanced_options
+        )
 
     def __set_controls_page_position_layout(self) -> None:
         self.__pdf_window_layout.get_pdf_page_num_spinbox().valueChanged.connect(

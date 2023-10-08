@@ -384,8 +384,11 @@ class PDFWindowVisualizationModel:
     def set_current_card_index(self, new_card_index: int) -> None:
         self.__cards_navigator.set_current_card_index(new_card_index)
 
-    def focus_question_field(self) -> None:
-        self.__window_layout.get_input_text_question().setFocus()
-
     def focus_spinbox(self) -> None:
         self.__window_layout.get_pdf_page_num_spinbox().setFocus()
+
+    def focus_advanced_options(self) -> None:
+        self.__window_layout.get_advanced_options_button().setFocus()
+
+    def focus_question_field(self) -> None:
+        self.__window_layout.get_input_text_question().setFocus()

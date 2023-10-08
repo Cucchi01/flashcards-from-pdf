@@ -61,6 +61,7 @@ These files are: `private_log_file.txt`, `private_folder_anki.txt`, `private_pdf
 | Ctrl++                     | Zoom in PDF                                         |
 | Ctrl+-                     | Zoom out PDF                                        |
 | Ctrl+G                     | Focus on spinbox                                    |
+| Ctrl+Q                     | Focus on advanced options                           |
 | Ctrl+E                     | Edit current flashcard                              |
 | Ctrl+A                     | Focus on question text input(A = Add new flashcard) |
 | Ctrl+S / Ctrl+Return       | Add/modify flashcard                                |
