@@ -27,8 +27,10 @@ class PDFWindowVisualizationControl:
         self.__shortcut_zoom_decrease: QShortcut
         self.__shortcut_modify_current_flashcard: QShortcut
         self.__shortcut_focus_question_field: QShortcut
-        self.__shortcut_manage_page_button_flashcard: QShortcut
-        self.__shortcut_manage_generic_button_flashcard: QShortcut
+        self.__shortcut_manage_page_button_flashcard_s: QShortcut
+        self.__shortcut_manage_page_button_flashcard_enter: QShortcut
+        self.__shortcut_manage_generic_button_flashcard_s: QShortcut
+        self.__shortcut_manage_generic_button_flashcard_enter: QShortcut
         self.__shortcut_delete_current_flashcard: QShortcut
         self.__shortcut_cancel_current_flashcard_modification: QShortcut
         self.__shortcut_previous_card: QShortcut
@@ -140,10 +142,18 @@ class PDFWindowVisualizationControl:
                 self.__pdf_window_model.manage_page_button_flashcard, flag_generic=False
             )
         )
-        self.__shortcut_manage_page_button_flashcard = QShortcut(
+        self.__shortcut_manage_page_button_flashcard_s = QShortcut(
             QKeySequence("Ctrl+S"), self.__pdf_window_layout
         )
-        self.__shortcut_manage_page_button_flashcard.activated.connect(
+        self.__shortcut_manage_page_button_flashcard_s.activated.connect(
+            partial(
+                self.__pdf_window_model.manage_page_button_flashcard, flag_generic=False
+            )
+        )
+        self.__shortcut_manage_page_button_flashcard_enter = QShortcut(
+            QKeySequence("Ctrl+Return"), self.__pdf_window_layout
+        )
+        self.__shortcut_manage_page_button_flashcard_enter.activated.connect(
             partial(
                 self.__pdf_window_model.manage_page_button_flashcard, flag_generic=False
             )
@@ -154,10 +164,18 @@ class PDFWindowVisualizationControl:
                 self.__pdf_window_model.manage_page_button_flashcard, flag_generic=True
             )
         )
-        self.__shortcut_manage_generic_button_flashcard = QShortcut(
+        self.__shortcut_manage_generic_button_flashcard_s = QShortcut(
             QKeySequence("Ctrl+Shift+S"), self.__pdf_window_layout
         )
-        self.__shortcut_manage_generic_button_flashcard.activated.connect(
+        self.__shortcut_manage_generic_button_flashcard_s.activated.connect(
+            partial(
+                self.__pdf_window_model.manage_page_button_flashcard, flag_generic=True
+            )
+        )
+        self.__shortcut_manage_generic_button_flashcard_enter = QShortcut(
+            QKeySequence("Ctrl+Shift+Return"), self.__pdf_window_layout
+        )
+        self.__shortcut_manage_generic_button_flashcard_enter.activated.connect(
             partial(
                 self.__pdf_window_model.manage_page_button_flashcard, flag_generic=True
             )
